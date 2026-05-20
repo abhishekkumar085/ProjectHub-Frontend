@@ -6,6 +6,7 @@ import MainLayout from "../layouts/MainLayout";
 import Login from "../features/auth/Login";
 import Projects from "../features/project/Project";
 import Managers from "../features/managers/Managers";
+import ViewDetails from "../features/managers/ViewDetails";
 
 function AppRoutes() {
   return (
@@ -27,6 +28,7 @@ function AppRoutes() {
         <Route path="projects" element={<Projects/>} />
         <Route path="my-projects" element={<Projects/>} />
         <Route path="managers" element={<Managers/>} />
+        <Route path="users/:id/projects" element={<ViewDetails/>} />
       </Route>
     </Routes>
   );

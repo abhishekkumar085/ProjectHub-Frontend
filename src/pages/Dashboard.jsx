@@ -9,7 +9,7 @@ function Dashboard(){
 
       <Sidebar />
 
-      <div className="flex-grow-1">
+      <div className="grow">
 
         <Header />
 

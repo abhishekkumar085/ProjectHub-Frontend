@@ -8,6 +8,7 @@ export interface Manager {
   email: string;
   empId: string;
   designation: string;
+  mobileNumber?: string;
   // createdAt?: string;
 }
 
@@ -16,6 +17,7 @@ export interface CreateManagerPayload {
   email: string;
   empId: string;
   designation: string;
+  mobileNumber?: string;
   password?: string;
   confirmPassword?: string;
 //   status: ManagerStatus;

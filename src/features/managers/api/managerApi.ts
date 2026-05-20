@@ -37,6 +37,38 @@ export const listManagers =
     };
   };
 
+export const getManager = async (
+  id: string
+): Promise<Manager> => {
+  try {
+    const response = await api.get(`/users/${id}`);
+    const payload = response.data as any;
+
+    if (payload?.data?.user) {
+      return payload.data.user;
+    }
+
+    if (payload?.data) {
+      return payload.data;
+    }
+
+    return payload;
+  } catch {
+    const response = await api.get(`/managers/${id}`);
+    const payload = response.data as any;
+
+    if (payload?.data?.manager) {
+      return payload.data.manager;
+    }
+
+    if (payload?.data) {
+      return payload.data;
+    }
+
+    return payload;
+  }
+};
+
 export const createManager = async (
   payload: CreateManagerPayload
 ): Promise<Manager> => {

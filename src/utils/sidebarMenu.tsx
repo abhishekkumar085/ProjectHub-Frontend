@@ -3,7 +3,6 @@ import type { SidebarMenuItem } from "../types/menu.types";
 import {
   FiHome,
   FiFolder,
-  FiUsers,
   FiUserCheck,
 } from "react-icons/fi";
 
@@ -44,15 +43,5 @@ export const sidebarMenu: SidebarMenuItem[] = [
     path: "/managers",
     icon: <FiUserCheck />,
     roles: [ROLES.ADMIN],
-  },
-
-  {
-    label: "Teams",
-    path: "/teams",
-    icon: <FiUsers />,
-    roles: [
-      ROLES.ADMIN,
-      ROLES.MANAGER,
-    ],
   },
 ];

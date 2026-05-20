@@ -1,19 +1,19 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
-// @ts-ignore: Sidebar is a JavaScript module without type declarations
-import Sidebar from '../components/common/Sidebar.js';
-// @ts-ignore: Sidebar is a JavaScript module without type declarations
-import Header from '../components/common/Header.js';
-
+import Sidebar from '../components/common/Sidebar';
+import Header from '../components/common/Header';
 
 function MainLayout() {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
+      <Sidebar collapsed={collapsed} />
 
-      <div className="flex flex-1 flex-col">
-        <Header />
+      <div className="flex flex-1 min-h-0 flex-col">
+        <Header collapsed={collapsed} onToggle={() => setCollapsed((value) => !value)} />
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 min-h-0 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>

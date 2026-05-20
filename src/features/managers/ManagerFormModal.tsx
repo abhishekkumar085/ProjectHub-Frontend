@@ -32,6 +32,7 @@ function ManagerFormModal({
                 email: "",
                 empId: "",
                 designation: "",
+                mobileNumber: "",
                 password: "",
                 confirmPassword: "",
 
@@ -45,13 +46,14 @@ function ManagerFormModal({
                 email: manager.email,
                 empId: manager.empId,
                 designation: manager.designation,
+                mobileNumber: manager.mobileNumber,
             });
         } else {
             reset();
         }
     }, [manager, reset]);
 
-     const password = watch("password");
+    const password = watch("password");
 
     const preventCopyPaste = (
         e:
@@ -64,28 +66,29 @@ function ManagerFormModal({
             ("ctrlKey" in e &&
                 (e.key.toLowerCase() === "c" ||
                     e.key.toLowerCase() ===
-                        "v" ||
+                    "v" ||
                     e.key.toLowerCase() ===
-                        "x"))
+                    "x"))
         ) {
             e.preventDefault();
         }
     };
 
-   const onSubmit = async (
+    const onSubmit = async (
         data: CreateManagerPayload
     ) => {
         try {
             const payload: CreateManagerPayload =
-                {
-                    name: data.name,
-                    email: data.email,
-                    empId:
-                        data.empId,
-                    designation:
-                        data.designation,
-                    password: data.password,
-                };
+            {
+                name: data.name,
+                email: data.email,
+                empId:
+                    data.empId,
+                designation:
+                    data.designation,
+                password: data.password,
+                mobileNumber: data.mobileNumber,
+            };
 
             if (isEditing && manager) {
                 await updateManager(
@@ -208,28 +211,41 @@ function ManagerFormModal({
                                 placeholder="Project Manager"
                             />
                         </div>
+                        <div>
+                            <label className="mb-2 block text-sm font-semibold text-slate-600">
+                                Mobile Number
+                            </label>
+
+                            <input
+                                {...register(
+                                    "mobileNumber"
+                                )}
+                                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                                placeholder="Mobile Number"
+                            />
+                        </div>
                         {/* Password */}
                         {!isEditing && (
                             <>
-                            <div className="md:col-span-2">
-                                <label className="mb-2 block text-sm font-semibold text-slate-600">
-                                    Password *
-                                </label>
+                                <div className="md:col-span-2">
+                                    <label className="mb-2 block text-sm font-semibold text-slate-600">
+                                        Password *
+                                    </label>
 
-                                <input
-                                    type="password"
-                                    {...register(
-                                        "password",
-                                        {
-                                            required: true,
-                                        }
-                                    )}
-                                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
-                                    placeholder="********"
-                                />
-                            </div>
-                      
-                         {/* Confirm Password */}
+                                    <input
+                                        type="password"
+                                        {...register(
+                                            "password",
+                                            {
+                                                required: true,
+                                            }
+                                        )}
+                                        className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                                        placeholder="********"
+                                    />
+                                </div>
+
+                                {/* Confirm Password */}
                                 <div className="md:col-span-2">
                                     <label className="mb-2 block text-sm font-semibold text-slate-600">
                                         Confirm Password *
@@ -260,7 +276,7 @@ function ManagerFormModal({
                                                         value
                                                     ) =>
                                                         value ===
-                                                            password ||
+                                                        password ||
                                                         "Passwords do not match",
                                             }
                                         )}

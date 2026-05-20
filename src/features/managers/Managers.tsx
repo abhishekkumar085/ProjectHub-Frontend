@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { FiPlus, FiTrash2, FiUsers, FiEdit2 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { FiPlus, FiTrash2, FiUsers, FiEye } from "react-icons/fi";
 import { deleteManager, listManagers } from "./api/managerApi";
 import type { Manager } from "./types/manager.types";
 import ManagerFormModal from "./ManagerFormModal";
@@ -15,10 +16,11 @@ function Managers() {
 
 
 
-    
+
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
     const [selectedManager, setSelectedManager] = useState<Manager | null>(null);
+    const navigate = useNavigate();
 
     const fetchManagers =
         async (p = page) => {
@@ -96,7 +98,7 @@ function Managers() {
                         </h3>
                     </div>
                 ) : (
-                    <table className="min-w-full">
+                    <table className="min-w-full w-full table-fixed divide-y divide-slate-200">
                         <thead className="bg-slate-50">
                             <tr>
                                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
@@ -115,62 +117,53 @@ function Managers() {
                                     Designation
                                 </th>
 
-                                <th className="px-6 py-4"></th>
+                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                    Mobile Number
+                                </th>
+
+                                <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">
+                                    Action
+                                </th>
                             </tr>
                         </thead>
 
-                        <tbody>
+                        <tbody className="bg-white divide-y divide-slate-200">
                             {items.map((manager) => (
                                 <tr
                                     key={manager.id}
-                                    className="border-t border-slate-100 hover:bg-slate-50"
+                                    className="hover:bg-slate-50"
                                 >
-                                    <td className="px-6 py-5 font-medium">
-                                        {
-                                            manager.name
-                                        }
+                                    <td className="px-6 py-4 font-medium text-slate-900">
+                                        {manager.name}
                                     </td>
 
-                                    <td className="px-6 py-5">
+                                    <td className="px-6 py-4 text-slate-600">
                                         {manager.email}
                                     </td>
 
-                                    <td className="px-6 py-5">
-                                        {
-                                            manager.empId
-                                        }
+                                    <td className="px-6 py-4 text-slate-600">
+                                        {manager.empId}
                                     </td>
 
-                                    <td className="px-6 py-5">
-                                        {
-                                            manager.designation
-                                        }
+                                    <td className="px-6 py-4 text-slate-600">
+                                        {manager.designation}
                                     </td>
 
+                                    <td className="px-6 py-4 text-slate-600">
+                                        {manager.mobileNumber}
+                                    </td>
 
-                                    <td className="px-6 py-5">
-                                        <div className="flex justify-end gap-2">
+                                    <td className="px-6 py-4 text-right">
+                                        <div className="inline-flex items-center justify-end gap-2">
                                             <button
-                                                onClick={() => {
-                                                    setSelectedManager(
-                                                        manager
-                                                    );
-
-                                                    setOpen(
-                                                        true
-                                                    );
-                                                }}
+                                                onClick={() => navigate(`/users/${manager.id}/projects`)}
                                                 className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
                                             >
-                                                <FiEdit2 />
+                                                <FiEye />
                                             </button>
 
                                             <button
-                                                onClick={() =>
-                                                    handleDelete(
-                                                        manager.id
-                                                    )
-                                                }
+                                                onClick={() => handleDelete(manager.id)}
                                                 className="rounded-lg p-2 text-red-500 hover:bg-red-50"
                                             >
                                                 <FiTrash2 />

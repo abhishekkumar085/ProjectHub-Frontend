@@ -127,43 +127,43 @@ const [selectedDocuments, setSelectedDocuments] =
             </p>
           </div>
         ) : (
-          <table className="min-w-full">
+          <table className="min-w-full table-fixed divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th scope="col" className="w-[32%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Name
                 </th>
 
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th scope="col" className="w-[18%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Status
                 </th>
 
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th scope="col" className="w-[14%] px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Priority
                 </th>
 {/* 
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Developers
                 </th> */}
 
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th scope="col" className="w-[14%] px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Documents
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th scope="col" className="w-[14%] px-4 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Action
                 </th>
 
-                {/* <th className="px-6 py-4"></th> */}
+                {/* <th className="px-4 py-4"></th> */}
               </tr>
             </thead>
 
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {items.map((p) => (
                 <tr
                   key={p.id}
                   className="border-t border-slate-100 hover:bg-slate-50"
                 >
-                  <td className="px-6 py-5">
+                  <td className="w-[32%] px-4 py-5">
                     <div className="font-semibold text-slate-900">
                       {p.name}
                     </div>
@@ -175,19 +175,19 @@ const [selectedDocuments, setSelectedDocuments] =
                     )}
                   </td>
 
-                  <td className="px-6 py-5">
+                  <td className="w-[18%] px-4 py-5">
                     <StatusBadge
                       status={p.status}
                     />
                   </td>
 
-                  <td className="px-6 py-5">
+                  <td className="w-[14%] px-4 py-5 text-center">
                     <PriorityBadge
                       priority={p.priority}
                     />
                   </td>
 
-                  {/* <td className="px-6 py-5">
+                  {/* <td className="px-4 py-5">
                     <div className="flex flex-wrap gap-2">
                       {p.developers.map((d) => (
                         <span
@@ -200,34 +200,27 @@ const [selectedDocuments, setSelectedDocuments] =
                     </div>
                   </td> */}
 
-                  <td className="px-6 py-5">
-                    <div className="flex flex-wrap gap-2">
-                      {/* View Docs */}
-                      <button
-                        onClick={() => {
-                          setSelectedDocuments(
-                            p.documents
-                          );
+                  <td className="w-[14%] px-4 py-5 text-center">
+                    <button
+                      onClick={() => {
+                        setSelectedDocuments(
+                          p.documents
+                        );
 
-                          setSelectedProjectName(
-                            p.name
-                          );
+                        setSelectedProjectName(
+                          p.name
+                        );
 
-                          setDocumentModalOpen(true);
-                        }}
-                        className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
-                      >
-                        <FiEye />
-                      </button>
-                    </div>
+                        setDocumentModalOpen(true);
+                      }}
+                      className="inline-flex items-center justify-center rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+                    >
+                      <FiEye />
+                    </button>
                   </td>
 
-                  <td className="px-6 py-5">
-                    <div className="flex justify-end gap-2">
-
-
-
-                      {/* Edit */}
+                  <td className="w-[14%] px-4 py-5 text-right">
+                    <div className="inline-flex items-center justify-end gap-2">
                       <button
                         onClick={() => {
                           setSelectedProject(p);
@@ -239,7 +232,6 @@ const [selectedDocuments, setSelectedDocuments] =
                         <FiEdit2 />
                       </button>
 
-                      {/* Delete */}
                       <button
                         onClick={() =>
                           handleDelete(p.id)

@@ -30,6 +30,7 @@ export interface Project {
   status: ProjectStatus;
   priority: ProjectPriority;
   clientName: string | null;
+  managerId?: string | null;
   // budget: string | null;
   startDate: string | null;
   endDate: string | null;
@@ -60,10 +61,4 @@ export interface CreateProjectPayload {
   prodUrl?: string | null;
   documents?: ProjectDocument[];
   validate?: (value: string) => boolean | string;
-}
-export interface Project {
-    id: string;
-    name: string;
-    description: string | null;
-    status: ProjectStatus;
 }
