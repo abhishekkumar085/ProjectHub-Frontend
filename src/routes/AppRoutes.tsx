@@ -1,0 +1,35 @@
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
+
+import Dashboard from "../features/dashboard/Dashboard";
+import MainLayout from "../layouts/MainLayout";
+import Login from "../features/auth/Login";
+import Projects from "../features/project/Project";
+import Managers from "../features/managers/Managers";
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" />} />
+
+        <Route path="dashboard" element={<Dashboard/>} />
+
+        <Route path="projects" element={<Projects/>} />
+        <Route path="my-projects" element={<Projects/>} />
+        <Route path="managers" element={<Managers/>} />
+      </Route>
+    </Routes>
+  );
+}
+
+export default AppRoutes;
