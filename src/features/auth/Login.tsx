@@ -73,7 +73,7 @@ function Login() {
 
     return (
         <>
-<div className="w-full lg:h-screen">
+<div className="w-full lg:h-screen lg:overflow-hidden">
         <div className="flex flex-wrap h-full">
             {/* <!-- Left Side - Image Grid (hidden on mobile) --> */}
             <div className="hidden lg:flex lg:w-8/12 bg-[#EDF3FF] rounded-[20px] p-1 h-full">
