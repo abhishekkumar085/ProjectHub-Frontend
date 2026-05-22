@@ -240,7 +240,7 @@ export default function ProjectFormInline({ project, isEditMode, isViewMode, onS
     };
 
     return (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 sm:p-6">
             <h2 className="text-lg font-semibold mb-4">{isViewOnly ? "View Project" : isEditing ? "Edit Project" : "Add Project"}</h2>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -284,7 +284,7 @@ export default function ProjectFormInline({ project, isEditMode, isViewMode, onS
                         <input type="date" {...register("endDate", { required: "End date is required" })} disabled={isViewOnly} className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500" />
                         {errors.endDate && <p className="mt-1 text-sm text-red-500">{errors.endDate.message}</p>}
                     </div>
-                    <div className="space-y-4 xl:col-span-3">
+                    <div className="space-y-4 md:col-span-2 xl:col-span-3">
                         <label className="block text-sm font-medium text-slate-700 mb-2">Environment Links</label>
 
                         <div className="space-y-4">
@@ -370,7 +370,7 @@ export default function ProjectFormInline({ project, isEditMode, isViewMode, onS
                                 <div className="flex items-center gap-3">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm"><FiFileText size={16} className="text-slate-500" /></div>
                                     <div>
-                                        <p className="font-medium text-slate-800 truncate w-60">{doc.originalName}</p>
+                                        <p className="font-medium text-slate-800 truncate w-32 sm:w-60">{doc.originalName}</p>
                                         <p className="text-xs text-slate-500">{doc.size ? `${(doc.size / 1024 / 1024).toFixed(2)} MB` : 'File'}</p>
                                     </div>
                                 </div>
@@ -398,18 +398,18 @@ export default function ProjectFormInline({ project, isEditMode, isViewMode, onS
             </form>
 
             {previewDocument && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
                     <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
-                        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-                            <div>
-                                <h2 className="text-xl font-semibold text-slate-900">Document Preview</h2>
-                                <p className="mt-1 text-sm text-slate-500">{previewDocument.originalName}</p>
+                        <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4">
+                            <div className="min-w-0">
+                                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Document Preview</h2>
+                                <p className="mt-1 text-sm text-slate-500 truncate">{previewDocument.originalName}</p>
                             </div>
                             <button onClick={() => setPreviewDocument(null)} className="rounded-lg p-2 hover:bg-slate-100">
                                 <FiX size={20} />
                             </button>
                         </div>
-                        <div className="h-[75vh] bg-slate-100">
+                        <div className="h-[60vh] sm:h-[75vh] bg-slate-100">
                             {getDocumentUrl(previewDocument) ? (
                                 <iframe
                                     title={previewDocument.originalName}

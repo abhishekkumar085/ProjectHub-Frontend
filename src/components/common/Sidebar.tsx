@@ -3,35 +3,39 @@ import { sidebarMenu } from "../../utils/sidebarMenu";
 
 interface SidebarProps {
   collapsed: boolean;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
-function Sidebar({ collapsed }: SidebarProps) {
-  const user = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
+function Sidebar({ collapsed, mobileOpen, onMobileClose }: SidebarProps) {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const userRole = user.role;
 
-
-  const filteredMenu = sidebarMenu.filter(
-    (item) =>
-      item.roles.includes(userRole)
+  const filteredMenu = sidebarMenu.filter((item) =>
+    item.roles.includes(userRole),
   );
 
   return (
     <aside
-      className={`sticky top-0 z-10 h-screen shrink-0 overflow-y-auto border-r border-slate-800 bg-slate-950 text-white transition-all duration-300 ${collapsed ? "w-24" : "w-64"
-        }`}
+      className={`
+        fixed top-0 left-0 z-40 h-screen shrink-0 overflow-y-auto bg-white text-white transition-all duration-300
+        lg:sticky lg:z-10
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0
+        ${collapsed ? "w-24" : "w-64"}
+      `}
     >
       {/* Top Section */}
-      <div className="flex h-20 items-center justify-start border-b border-slate-800 px-5">
+      <div className="flex h-20 items-center justify-start px-5">
         {collapsed ? (
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-lg font-bold text-white shadow-sm">
             PH
           </div>
         ) : (
-          <h1 className="ml-3 bg-linear-to-r from-blue-400 to-indigo-500 bg-clip-text text-2xl font-bold text-transparent">
-            ProjectHub
+          <h1 className="ml-3 text-2xl font-bold">
+            <span className="text-[#0059FF]">Project</span>
+            <span className="text-[#00076F]">Hub</span>
           </h1>
         )}
       </div>
@@ -42,10 +46,12 @@ function Sidebar({ collapsed }: SidebarProps) {
           <NavLink
             key={item.path}
             to={item.path}
+            onClick={() => onMobileClose?.()}
             className={({ isActive }) =>
-              `group flex items-center ${collapsed ? "justify-center" : "justify-start"} gap-4 rounded-2xl px-4 py-3 transition-all duration-300 ${isActive
-                ? "bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-lg"
-                : "text-slate-400 hover:bg-slate-900 hover:text-white"
+              `group relative flex items-center ${collapsed ? "justify-center" : "justify-start"} gap-4 rounded-2xl px-4 py-3 transition-all duration-300 ${
+                isActive
+                  ? "bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] text-white shadow-[0_4px_20px_rgba(59,130,246,0.4)] before:absolute before:right-0 before:top-1/2 before:-translate-y-1/2 before:h-6 before:w-1 before:rounded-l before:bg-white before:content-['']"
+                  : "text-[#161616] hover:bg-slate-100"
               }`
             }
           >
@@ -54,7 +60,7 @@ function Sidebar({ collapsed }: SidebarProps) {
             </span>
 
             {!collapsed && (
-              <span className="whitespace-nowrap font-medium">
+              <span className="whitespace-nowrap text-sm font-bold font-[Mulish]">
                 {item.label}
               </span>
             )}

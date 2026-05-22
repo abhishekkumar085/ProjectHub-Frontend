@@ -74,9 +74,9 @@ function AddManager() {
 
     return (
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-200 px-6 py-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 px-4 sm:px-6 py-4 sm:py-6">
                 <div>
-                    <h1 className="text-2xl font-semibold text-slate-900">Add Manager</h1>
+                    <h1 className="text-xl sm:text-2xl font-semibold text-slate-900">Add Manager</h1>
                     <p className="mt-1 text-sm text-slate-500">
                         Complete the manager details and save to add a new manager.
                     </p>
@@ -84,13 +84,13 @@ function AddManager() {
 
                 <button
                     onClick={() => navigate("/managers")}
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 self-start sm:self-auto"
                 >
-                    <FiArrowLeft /> Back to Managers
+                    <FiArrowLeft /> <span className="hidden sm:inline">Back to Managers</span><span className="sm:hidden">Back</span>
                 </button>
             </div>
 
-            <form id="add-manager-form" onSubmit={handleSubmit(onSubmit)} className="p-6">
+            <form id="add-manager-form" onSubmit={handleSubmit(onSubmit)} className="p-4 sm:p-6">
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <div>
                         <label className="mb-2 block text-sm font-semibold text-slate-600">

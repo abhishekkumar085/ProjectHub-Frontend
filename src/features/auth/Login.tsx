@@ -61,7 +61,7 @@ function Login() {
 
     return (
         <div
-            className="relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-10"
+            className="relative flex min-h-screen items-center justify-center overflow-hidden px-3 sm:px-5 py-6 sm:py-10"
             style={{
                 backgroundImage: `
       linear-gradient(
@@ -82,17 +82,17 @@ function Login() {
             <div className="relative z-10 flex w-full max-w-5xl overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.25)] max-lg:flex-col">
 
                 {/* LEFT SECTION */}
-                <div className="relative w-1/2 bg-[rgba(18,28,140,0.92)] px-10 py-12 text-white backdrop-blur-xl max-lg:w-full max-lg:min-h-95">
+                <div className="relative w-1/2 bg-[rgba(18,28,140,0.92)] px-6 sm:px-10 py-8 sm:py-12 text-white backdrop-blur-xl max-lg:w-full max-lg:min-h-72 sm:max-lg:min-h-95">
 
-                    <h4 className="mb-1 text-[28px] font-medium">
+                    <h4 className="mb-1 text-xl sm:text-[28px] font-medium">
                         Welcome To
                     </h4>
 
-                    <h1 className="mb-6 text-5xl font-bold text-[#7db4ff]">
+                    <h1 className="mb-4 sm:mb-6 text-3xl sm:text-5xl font-bold text-[#7db4ff]">
                         ProjectHub
                     </h1>
 
-                    <p className="mb-10 max-w-md text-[15px] leading-8 text-[#dbe0ff]">
+                    <p className="mb-6 sm:mb-10 max-w-md text-sm sm:text-[15px] leading-6 sm:leading-8 text-[#dbe0ff]">
                         Manage projects, collaborate
                         with developers, track
                         progress, and organize
@@ -101,9 +101,9 @@ function Login() {
                     </p>
 
                     {/* Stats */}
-                    <div className="flex gap-5">
-                        <div className="w-35 rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-                            <h2 className="mb-1 text-3xl font-bold">
+                    <div className="flex gap-3 sm:gap-5">
+                        <div className="w-28 sm:w-35 rounded-2xl border border-white/15 bg-white/10 p-3 sm:p-5 backdrop-blur-xl">
+                            <h2 className="mb-1 text-2xl sm:text-3xl font-bold">
                                 120+
                             </h2>
 
@@ -112,8 +112,8 @@ function Login() {
                             </span>
                         </div>
 
-                        <div className="w-35 rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
-                            <h2 className="mb-1 text-3xl font-bold">
+                        <div className="w-28 sm:w-35 rounded-2xl border border-white/15 bg-white/10 p-3 sm:p-5 backdrop-blur-xl">
+                            <h2 className="mb-1 text-2xl sm:text-3xl font-bold">
                                 50+
                             </h2>
 
@@ -124,7 +124,7 @@ function Login() {
                     </div>
 
                     {/* Footer */}
-                    <div className="absolute bottom-7 left-10 text-xs text-[#cfd3ff]">
+                    <div className="hidden sm:block absolute bottom-7 left-10 text-xs text-[#cfd3ff]">
                         Copyright © 2026
                         ProjectHub. All rights
                         reserved.
@@ -132,13 +132,13 @@ function Login() {
                 </div>
 
                 {/* RIGHT SECTION */}
-                <div className="w-1/2 bg-white px-11 py-8 max-lg:w-full">
+                <div className="w-1/2 bg-white px-5 sm:px-11 py-6 sm:py-8 max-lg:w-full">
 
-                    <h2 className="mb-4 text-center text-[34px] font-bold text-[#0057ff]">
+                    <h2 className="mb-3 sm:mb-4 text-center text-2xl sm:text-[34px] font-bold text-[#0057ff]">
                         Sign In
                     </h2>
 
-                    <p className="mb-8 text-center text-sm leading-7 text-gray-500">
+                    <p className="mb-5 sm:mb-8 text-center text-sm leading-6 sm:leading-7 text-gray-500">
                         Access your project,
                         collaborate with teams,
                         and manage everything from

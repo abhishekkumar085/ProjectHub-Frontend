@@ -1,186 +1,217 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FiPlus, FiTrash2, FiUsers, FiEye } from "react-icons/fi";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FiTrash2,
+  FiUsers,
+  FiEye,
+  FiSearch,
+  FiChevronRight,
+} from "react-icons/fi";
+import plusIcon from "../../assets/plus icon.png";
 import { deleteManager, listManagers } from "./api/managerApi";
 import type { Manager } from "./types/manager.types";
 import Pagination from "../../components/common/Pagination";
 
 function Managers() {
-    const [items, setItems] = useState<Manager[]>([]);
-    const [page, setPage] = useState<number>(1);
-    const [limit] = useState<number>(5);
-    const [total, setTotal] = useState<number>(0);
-    const [totalPages, setTotalPages] = useState<number>(1);
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+  const [items, setItems] = useState<Manager[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [limit] = useState<number>(5);
+  const [total, setTotal] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const fetchManagers =
-        async (p = page) => {
-            try {
-                setLoading(true);
+  const fetchManagers = async (p = page) => {
+    try {
+      setLoading(true);
 
-                const res = await listManagers(p, limit);
+      const res = await listManagers(p, limit);
 
-                setItems(res.users);
-                setTotal(res.total);
-                setTotalPages(res.totalPages);
-                setPage(res.page);
-            } finally {
-                setLoading(false);
-            }
-        };
+      setItems(res.users);
+      setTotal(res.total);
+      setTotalPages(res.totalPages);
+      setPage(res.page);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        fetchManagers();
-    }, []);
+  useEffect(() => {
+    fetchManagers();
+  }, []);
 
-    const handleDelete = async (
-        id: string
-    ) => {
-        await deleteManager(id);
+  const handleDelete = async (id: string) => {
+    await deleteManager(id);
 
-        // refresh current page
-        await fetchManagers(page);
-    };
+    // refresh current page
+    await fetchManagers(page);
+  };
 
-    return (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 p-6">
-                <div>
-                    <h2 className="text-xl font-semibold text-slate-900">
-                        Managers
-                    </h2>
+  return (
+    <div className="rounded-2xl">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1 text-sm font-[Poppins] mb-2">
+        <Link to="/" className="text-[#0059FF] hover:underline">
+          Home
+        </Link>
+        <FiChevronRight size={14} className="text-slate-400" />
+        <span className="text-slate-500">Users</span>
+      </nav>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                        {total} total managers
-                    </p>
-                </div>
-
-                <button
-                    onClick={() => navigate("/managers/add")}
-                    className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                >
-                    <FiPlus />
-
-                    Add Manager
-                </button>
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto">
-                {loading ? (
-                    <div className="p-10 text-center">
-                        Loading...
-                    </div>
-                ) : items.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center p-14 text-center">
-                        <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                            <FiUsers size={30} />
-                        </div>
-
-                        <h3 className="text-lg font-semibold">
-                            No managers found
-                        </h3>
-                    </div>
-                ) : (
-                    <table className="min-w-full w-full table-fixed divide-y divide-slate-200">
-                        <thead className="bg-slate-50">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                    Name
-                                </th>
-
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                    Email
-                                </th>
-
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                    Employee ID
-                                </th>
-
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                    Designation
-                                </th>
-
-                                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                    Mobile Number
-                                </th>
-
-                                <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">
-                                    Action
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody className="bg-white divide-y divide-slate-200">
-                            {items.map((manager) => (
-                                <tr
-                                    key={manager.id}
-                                    className="hover:bg-slate-50"
-                                >
-                                    <td className="px-6 py-4 font-medium text-slate-900">
-                                        {manager.name}
-                                    </td>
-
-                                    <td className="px-6 py-4 text-slate-600">
-                                        {manager.email}
-                                    </td>
-
-                                    <td className="px-6 py-4 text-slate-600">
-                                        {manager.empId}
-                                    </td>
-
-                                    <td className="px-6 py-4 text-slate-600">
-                                        {manager.designation}
-                                    </td>
-
-                                    <td className="px-6 py-4 text-slate-600">
-                                        {manager.mobileNumber}
-                                    </td>
-
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="inline-flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={() => navigate(`/users/${manager.id}/projects`)}
-                                                className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
-                                            >
-                                                <FiEye />
-                                            </button>
-
-                                            <button
-                                                onClick={() => handleDelete(manager.id)}
-                                                className="rounded-lg p-2 text-red-500 hover:bg-red-50"
-                                            >
-                                                <FiTrash2 />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
-            </div>
-
-            <Pagination
-                page={page}
-                totalPages={totalPages}
-                total={total}
-                onPrev={() => {
-                    if (page > 1) {
-                        fetchManagers(page - 1);
-                    }
-                }}
-                onNext={() => {
-                    if (page < totalPages) {
-                        fetchManagers(page + 1);
-                    }
-                }}
-                onPageChange={(pageNumber) => fetchManagers(pageNumber)}
-            />
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2">
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Users</h2>
+          <p className="text-sm text-slate-500">({total} results found)</p>
         </div>
-    );
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="relative flex-1 sm:flex-none">
+            <FiSearch
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              size={16}
+            />
+            <input
+              type="text"
+              placeholder="Search"
+              className="h-[40px] sm:h-[45px] w-full sm:w-80 rounded-lg border border-[#DCDCDC] bg-white py-3 pl-9 pr-4 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <button
+            onClick={() => navigate("/managers/add")}
+            className="inline-flex h-[40px] sm:h-[45px] items-center gap-2 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium text-white whitespace-nowrap"
+            style={{
+              background: "linear-gradient(90deg, #0059FF 0%, #003699 100%)",
+            }}
+          >
+            <img src={plusIcon} alt="+" className="h-4 w-4 object-contain" />
+            <span className="hidden sm:inline">Add User</span>
+            <span className="sm:hidden">Add</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="overflow-x-auto">
+        {loading ? (
+          <div className="p-10 text-center">Loading...</div>
+        ) : items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-14 text-center">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+              <FiUsers size={30} />
+            </div>
+
+            <h3 className="text-lg font-semibold">No managers found</h3>
+          </div>
+        ) : (
+          <table className="min-w-[800px] w-full table-fixed border-separate border-spacing-y-2">
+            <thead>
+              <tr className="h-[45px] bg-[#EEF4FF]">
+                <th className="w-[90px] pl-[30px] pr-4 py-2 text-left text-sm font-medium text-[#161616] font-[Poppins] leading-none rounded-l-lg">
+                  Sr. No.
+                </th>
+
+                <th className="pl-3 pr-4 py-2 text-left text-sm font-medium text-[#161616] font-[Poppins] leading-none">
+                  Name
+                </th>
+
+                <th className="pl-3 pr-4 py-2 text-left text-sm font-medium text-[#161616] font-[Poppins] leading-none">
+                  Email
+                </th>
+
+                <th className="pl-3 pr-4 py-2 text-left text-sm font-medium text-[#161616] font-[Poppins] leading-none">
+                  Employee ID
+                </th>
+
+                <th className="pl-3 pr-4 py-2 text-left text-sm font-medium text-[#161616] font-[Poppins] leading-none">
+                  Designation
+                </th>
+
+                <th className="pl-3 pr-4 py-2 text-left text-sm font-medium text-[#161616] font-[Poppins] leading-none">
+                  Mobile Number
+                </th>
+
+                <th className="pl-3 pr-[30px] py-2 text-center text-sm font-medium text-[#161616] font-[Poppins] leading-none rounded-r-lg">
+                  Action
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="bg-white">
+              {items.map((manager, index) => (
+                <tr
+                  key={manager.id}
+                  className="h-[45px] bg-white hover:bg-slate-50"
+                >
+                  <td className="w-[80px] pl-[30px] pr-4 py-2 text-sm font-normal text-[#444444] font-[Poppins] leading-none rounded-l-lg border-y border-l border-[#F5F5F5]">
+                    {(page - 1) * limit + index + 1}
+                  </td>
+
+                  <td className="pl-3 pr-4 py-2 text-sm font-normal text-[#444444] font-[Poppins] leading-none border-y border-[#F5F5F5] truncate max-w-0">
+                    {manager.name}
+                  </td>
+
+                  <td className="pl-3 pr-4 py-2 text-sm font-normal text-[#444444] font-[Poppins] leading-none border-y border-[#F5F5F5] truncate max-w-0">
+                    {manager.email}
+                  </td>
+
+                  <td className="pl-3 pr-4 py-2 text-sm font-normal text-[#444444] font-[Poppins] leading-none border-y border-[#F5F5F5] truncate max-w-0">
+                    {manager.empId}
+                  </td>
+
+                  <td className="pl-3 pr-4 py-2 text-sm font-normal text-[#444444] font-[Poppins] leading-none border-y border-[#F5F5F5] truncate max-w-0">
+                    {manager.designation}
+                  </td>
+
+                  <td className="pl-3 pr-4 py-2 text-sm font-normal text-[#444444] font-[Poppins] leading-none border-y border-[#F5F5F5] truncate max-w-0">
+                    {manager.mobileNumber}
+                  </td>
+
+                  <td className="pl-3 pr-[30px] py-2 text-center rounded-r-lg border-y border-r border-[#F5F5F5]">
+                    <div className="inline-flex items-center justify-center gap-2">
+                      <button
+                        onClick={() =>
+                          navigate(`/users/${manager.id}/projects`)
+                        }
+                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] gap-2 p-2 bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
+                      >
+                        <FiEye size={16} />
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(manager.id)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FFECED] text-[#AF232A] hover:bg-[#ffe0e1]"
+                      >
+                        <FiTrash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPrev={() => {
+          if (page > 1) {
+            fetchManagers(page - 1);
+          }
+        }}
+        onNext={() => {
+          if (page < totalPages) {
+            fetchManagers(page + 1);
+          }
+        }}
+        onPageChange={(pageNumber) => fetchManagers(pageNumber)}
+      />
+    </div>
+  );
 }
 
 export default Managers;
