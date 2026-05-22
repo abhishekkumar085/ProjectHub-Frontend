@@ -3,6 +3,7 @@
 //   | "INACTIVE";
 
 export interface Manager {
+  message: string;
   id: string;
   name: string;
   email: string;
@@ -17,6 +18,7 @@ export interface CreateManagerPayload {
   email: string;
   empId: string;
   designation: string;
+  role?: "" | "Manager" | "Leadership";
   mobileNumber?: string;
   password?: string;
   confirmPassword?: string;

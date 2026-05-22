@@ -3,23 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { FiPlus, FiTrash2, FiUsers, FiEye } from "react-icons/fi";
 import { deleteManager, listManagers } from "./api/managerApi";
 import type { Manager } from "./types/manager.types";
-import ManagerFormModal from "./ManagerFormModal";
-
+import Pagination from "../../components/common/Pagination";
 
 function Managers() {
     const [items, setItems] = useState<Manager[]>([]);
     const [page, setPage] = useState<number>(1);
-    const [limit] = useState<number>(10);
+    const [limit] = useState<number>(5);
     const [total, setTotal] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(1);
-
-
-
-
-
     const [loading, setLoading] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [selectedManager, setSelectedManager] = useState<Manager | null>(null);
     const navigate = useNavigate();
 
     const fetchManagers =
@@ -66,13 +58,7 @@ function Managers() {
                 </div>
 
                 <button
-                    onClick={() => {
-                        setSelectedManager(
-                            null
-                        );
-
-                        setOpen(true);
-                    }}
+                    onClick={() => navigate("/managers/add")}
                     className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                 >
                     <FiPlus />
@@ -177,49 +163,21 @@ function Managers() {
                 )}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex items-center justify-between gap-4 p-4">
-                    <div className="text-sm text-slate-600">
-                        Showing page {page} of {totalPages} — {total} total
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={() => {
-                                if (page > 1) {
-                                    fetchManagers(page - 1);
-                                }
-                            }}
-                            disabled={page <= 1}
-                            className="rounded-lg px-3 py-1 bg-slate-100 disabled:opacity-50"
-                        >
-                            Prev
-                        </button>
-
-                        <button
-                            onClick={() => {
-                                if (page < totalPages) {
-                                    fetchManagers(page + 1);
-                                }
-                            }}
-                            disabled={page >= totalPages}
-                            className="rounded-lg px-3 py-1 bg-slate-100 disabled:opacity-50"
-                        >
-                            Next
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal */}
-            <ManagerFormModal
-                open={open}
-                onClose={() =>
-                    setOpen(false)
-                }
-                refresh={fetchManagers}
-                manager={selectedManager}
+            <Pagination
+                page={page}
+                totalPages={totalPages}
+                total={total}
+                onPrev={() => {
+                    if (page > 1) {
+                        fetchManagers(page - 1);
+                    }
+                }}
+                onNext={() => {
+                    if (page < totalPages) {
+                        fetchManagers(page + 1);
+                    }
+                }}
+                onPageChange={(pageNumber) => fetchManagers(pageNumber)}
             />
         </div>
     );

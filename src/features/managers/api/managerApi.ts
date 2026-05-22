@@ -24,14 +24,22 @@ export const listManagers =
 
     const users = payload?.data?.users ?? [];
     const total = payload?.data?.total ?? users.length;
-    const totalPages = payload?.data?.totalPages ?? 1;
-    const respPage = payload?.data?.page ?? page;
-    const respLimit = payload?.data?.limit ?? limit;
+    const serverPage = payload?.data?.page;
+    const respPage = typeof serverPage === "number" && serverPage > 0 ? serverPage : page;
+    const respLimit = limit; // always honor the requested page size
+    const expectedTotalPages = respLimit > 0 ? Math.max(1, Math.ceil(total / respLimit)) : 1;
+    const totalPages = Math.max(payload?.data?.totalPages ?? 0, expectedTotalPages);
+
+    // If the server returned a page value that doesn't match the requested page, trust the requested page
+    const effectivePage = serverPage === page || serverPage === undefined ? respPage : page;
+    const pagedUsers = users.length > respLimit
+      ? users.slice((effectivePage - 1) * respLimit, effectivePage * respLimit)
+      : users;
 
     return {
-      users,
+      users: pagedUsers,
       total,
-      page: respPage,
+      page: effectivePage,
       limit: respLimit,
       totalPages,
     };

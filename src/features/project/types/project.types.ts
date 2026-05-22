@@ -60,5 +60,6 @@ export interface CreateProjectPayload {
   uatUrl?: string | null;
   prodUrl?: string | null;
   documents?: ProjectDocument[];
+  isEnabled?: boolean;
   validate?: (value: string) => boolean | string;
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FiFolder,
   FiPlus,
@@ -11,10 +12,9 @@ import {
 
 import StatusBadge from "./StatusBadge";
 import PriorityBadge from "./PriorityBadge";
-import type { Project, ProjectDocument } from "./types/project.types";
+import type { Project } from "./types/project.types";
 import { deleteProject, listProjects } from "./api/projectApi";
-import ProjectFormModal from "./ProjectFormModal";
-import ProjectDocumentsModal from "./ProjectDocumentsModal";
+import Pagination from "../../components/common/Pagination";
 
 
 
@@ -23,25 +23,17 @@ function Projects() {
   const [items, setItems] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState<number>(1);
-  const [limit] = useState<number>(10);
+  const [limit] = useState<number>(5);
   const [total, setTotal] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [open, setOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [documentModalOpen, setDocumentModalOpen] =
-    useState(false);
 
-const [selectedDocuments, setSelectedDocuments] =
-  useState<ProjectDocument[]>([]);
+  const navigate = useNavigate();
 
-  const [selectedProjectName, setSelectedProjectName] =
-    useState("");
+  // const user = JSON.parse(
+  //   localStorage.getItem("user") || "{}"
+  // );
 
-  const user = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
-
-  const userRole = user.role;
+  // const userRole = user.role;
 
 
   const fetchProjects = async (requestedPage = page) => {
@@ -86,22 +78,13 @@ const [selectedDocuments, setSelectedDocuments] =
             {total} total projects
           </p>
         </div>
-
-        {
-          userRole === "MANAGER" && (
-            <button
-              onClick={() => {
-                setSelectedProject(null);
-                setOpen(true);
-              }}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              <FiPlus />
-              New Project
-            </button>
-          )
-        }
-
+        <button
+          onClick={() => navigate("/projects/add-edit")}
+          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          <FiPlus />
+          New Project
+        </button>
       </div>
 
       {/* Table */}
@@ -130,26 +113,30 @@ const [selectedDocuments, setSelectedDocuments] =
           <table className="min-w-full table-fixed divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
-                <th scope="col" className="w-[32%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th scope="col" className="w-[20%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Name
                 </th>
 
-                <th scope="col" className="w-[18%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th scope="col" className="w-[15%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Status
                 </th>
 
-                <th scope="col" className="w-[14%] px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <th scope="col" className="w-[15%] px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Priority
                 </th>
-{/* 
-                <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Developers
-                </th> */}
 
-                <th scope="col" className="w-[14%] px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  Documents
+                <th className="w-[15%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Start Date
                 </th>
-                <th scope="col" className="w-[14%] px-4 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-400">
+
+                <th className="w-[15%] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  End Date
+                </th>
+
+                {/* <th scope="col" className="w-[14%] px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Documents
+                </th> */}
+                <th scope="col" className="w-[15%] px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider text-slate-400">
                   Action
                 </th>
 
@@ -163,25 +150,19 @@ const [selectedDocuments, setSelectedDocuments] =
                   key={p.id}
                   className="border-t border-slate-100 hover:bg-slate-50"
                 >
-                  <td className="w-[32%] px-4 py-5">
-                    <div className="font-semibold text-slate-900">
+                  <td className="w-[20%] px-4 py-5">
+                    <div className=" text-slate-900">
                       {p.name}
                     </div>
-
-                    {p.clientName && (
-                      <div className="mt-1 text-xs text-slate-500">
-                        {p.clientName}
-                      </div>
-                    )}
                   </td>
 
-                  <td className="w-[18%] px-4 py-5">
+                  <td className="w-[15%] px-4 py-5">
                     <StatusBadge
                       status={p.status}
                     />
                   </td>
 
-                  <td className="w-[14%] px-4 py-5 text-center">
+                  <td className="w-[15%] px-4 py-5 text-center">
                     <PriorityBadge
                       priority={p.priority}
                     />
@@ -200,7 +181,7 @@ const [selectedDocuments, setSelectedDocuments] =
                     </div>
                   </td> */}
 
-                  <td className="w-[14%] px-4 py-5 text-center">
+                  {/* <td className="w-[14%] px-4 py-5 text-center">
                     <button
                       onClick={() => {
                         setSelectedDocuments(
@@ -217,16 +198,36 @@ const [selectedDocuments, setSelectedDocuments] =
                     >
                       <FiEye />
                     </button>
+                  </td> */}
+                  <td className="w-[15%] px-4 py-5">
+                    <div className="text-slate-900">
+                      {p.startDate
+                        ? new Date(p.startDate)
+                          .toLocaleDateString('en-GB')
+                          .replace(/\//g, '-')
+                        : '-'}
+                    </div>
                   </td>
-
-                  <td className="w-[14%] px-4 py-5 text-right">
-                    <div className="inline-flex items-center justify-end gap-2">
+                  <td className="w-[15%] px-4 py-5">
+                    <div className="text-slate-900">
+                      {p.endDate
+                        ? new Date(p.endDate)
+                          .toLocaleDateString('en-GB')
+                          .replace(/\//g, '-')
+                        : '-'}
+                    </div>
+                  </td>
+                  <td className="w-[15%] px-4 py-5 text-center">
+                    <div className="inline-flex items-start justify-end gap-2">
                       <button
-                        onClick={() => {
-                          setSelectedProject(p);
+                        onClick={() => navigate("/projects/add-edit", { state: { projectId: p.id, viewOnly: true } })}
+                        className="rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+                      >
+                        <FiEye />
+                      </button>
 
-                          setOpen(true);
-                        }}
+                      <button
+                        onClick={() => navigate("/projects/add-edit", { state: { projectId: p.id } })}
                         className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
                       >
                         <FiEdit2 />
@@ -242,6 +243,14 @@ const [selectedDocuments, setSelectedDocuments] =
                       </button>
                     </div>
                   </td>
+                  {/* <td className="w-[15%] px-4 py-5 text-center">
+                    <button
+                      onClick={() => navigate("/projects/add-edit", { state: { projectId: p.id, viewOnly: true } })}
+                      className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
+                    >
+                      <FiEye />
+                    </button>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
@@ -249,51 +258,17 @@ const [selectedDocuments, setSelectedDocuments] =
         )}
       </div>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between gap-4 p-4">
-          <div className="text-sm text-slate-600">
-            Showing page {page} of {totalPages} — {total} total
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                if (page > 1) fetchProjects(page - 1);
-              }}
-              disabled={page <= 1}
-              className="rounded-lg px-3 py-1 bg-slate-100 disabled:opacity-50"
-            >
-              Prev
-            </button>
-
-            <button
-              onClick={() => {
-                if (page < totalPages) fetchProjects(page + 1);
-              }}
-              disabled={page >= totalPages}
-              className="rounded-lg px-3 py-1 bg-slate-100 disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Modal */}
-      <ProjectFormModal
-        open={open}
-        onClose={() => setOpen(false)}
-        refresh={fetchProjects}
-        project={selectedProject}
-      />
-      <ProjectDocumentsModal
-        open={documentModalOpen}
-        onClose={() =>
-          setDocumentModalOpen(false)
-        }
-        documents={selectedDocuments}
-        projectName={selectedProjectName}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        onPrev={() => {
+          if (page > 1) fetchProjects(page - 1);
+        }}
+        onNext={() => {
+          if (page < totalPages) fetchProjects(page + 1);
+        }}
+        onPageChange={(pageNumber) => fetchProjects(pageNumber)}
       />
     </div>
   );

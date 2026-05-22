@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { FiX } from "react-icons/fi";
 import { createManager, updateManager } from "./api/managerApi";
 import type { CreateManagerPayload, Manager } from "./types/manager.types";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 interface Props {
     open: boolean;
@@ -90,22 +91,32 @@ function ManagerFormModal({
                 mobileNumber: data.mobileNumber,
             };
 
+            let response;
+
             if (isEditing && manager) {
-                await updateManager(
+                response = await updateManager(
                     manager.id,
                     payload
                 );
             } else {
-                await createManager(
+                response = await createManager(
                     payload
                 );
             }
 
-            refresh();
+            showSuccessToast(
+                response?.message ||
+                'Operation successful'
+            );
 
+            refresh();
             onClose();
-        } catch (error) {
+        } catch (error:any) {
             console.error(error);
+            showErrorToast(
+                error?.response?.data?.message ||
+                'Something went wrong'
+            );
         }
     };
 
@@ -145,20 +156,20 @@ function ManagerFormModal({
                             </label>
 
                             <input
-                                {...register(
-                                    "name",
-                                    {
-                                        required: true,
-                                    }
-                                )}
+                                {...register("name", {
+                                    required: "Full name is required",
+                                    minLength: {
+                                        value: 2,
+                                        message: "Full name must be at least 2 characters",
+                                    },
+                                })}
                                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                                 placeholder="John Doe"
                             />
 
                             {errors.name && (
                                 <p className="mt-1 text-sm text-red-500">
-                                    Full name is
-                                    required
+                                    {errors.name.message}
                                 </p>
                             )}
                         </div>
@@ -172,11 +183,20 @@ function ManagerFormModal({
                             <input
                                 type="email"
                                 {...register("email", {
-                                    required: true,
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                        message: "Enter a valid email address",
+                                    },
                                 })}
                                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                                 placeholder="manager@example.com"
                             />
+                            {errors.email && (
+                                <p className="mt-1 text-sm text-red-500">
+                                    {errors.email.message}
+                                </p>
+                            )}
                         </div>
 
                         {/* Employee ID */}
@@ -186,15 +206,21 @@ function ManagerFormModal({
                             </label>
 
                             <input
-                                {...register(
-                                    "empId",
-                                    {
-                                        required: true,
-                                    }
-                                )}
+                                {...register("empId", {
+                                    required: "Employee ID is required",
+                                    minLength: {
+                                        value: 2,
+                                        message: "Employee ID must be at least 2 characters",
+                                    },
+                                })}
                                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                                 placeholder="EMP001"
                             />
+                            {errors.empId && (
+                                <p className="mt-1 text-sm text-red-500">
+                                    {errors.empId.message}
+                                </p>
+                            )}
                         </div>
 
                         {/* Designation */}
@@ -217,12 +243,22 @@ function ManagerFormModal({
                             </label>
 
                             <input
-                                {...register(
-                                    "mobileNumber"
-                                )}
+                                type="tel"
+                                {...register("mobileNumber", {
+                                    required: "Mobile number is required",
+                                    pattern: {
+                                        value: /^[0-9]{10,15}$/,
+                                        message: "Enter a valid mobile number",
+                                    },
+                                })}
                                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                                 placeholder="Mobile Number"
                             />
+                            {errors.mobileNumber && (
+                                <p className="mt-1 text-sm text-red-500">
+                                    {errors.mobileNumber.message}
+                                </p>
+                            )}
                         </div>
                         {/* Password */}
                         {!isEditing && (
@@ -234,15 +270,21 @@ function ManagerFormModal({
 
                                     <input
                                         type="password"
-                                        {...register(
-                                            "password",
-                                            {
-                                                required: true,
-                                            }
-                                        )}
+                                        {...register("password", {
+                                            required: "Password is required",
+                                            minLength: {
+                                                value: 8,
+                                                message: "Password must be at least 8 characters",
+                                            },
+                                        })}
                                         className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                                         placeholder="********"
                                     />
+                                    {errors.password && (
+                                        <p className="mt-1 text-sm text-red-500">
+                                            {errors.password.message}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Confirm Password */}

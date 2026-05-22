@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import {
     createProject,
     updateProject,
-    uploadDocument,
 } from "./api/projectApi";
 
 
@@ -227,29 +226,11 @@ const onSubmit = async (
         else if (project) {
             await updateProject(
                 project.id,
-                payload
+                payload,
+                documents
+                    .map((doc) => doc.file)
+                    .filter((f): f is File => !!f)
             );
-
-            if (documents.length > 0) {
-                const uploadedDocs =
-                    await Promise.all(
-                        documents.map(async (doc: any) => {
-                            if (doc.file) {
-                                return await uploadDocument(
-                                    project.id,
-                                    doc.file
-                                );
-                            }
-
-                            return doc;
-                        })
-                    );
-
-                console.log(
-                    "Uploaded Docs:",
-                    uploadedDocs
-                );
-            }
         }
 
         refresh();

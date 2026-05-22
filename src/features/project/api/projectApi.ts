@@ -63,6 +63,29 @@ export const listProjects = async (
   return { projects: [], total: 0, page, limit, totalPages: 1 };
 };
 
+export const getProjectById = async (id: string): Promise<Project | null> => {
+  const res = await api.get(`/project/${id}/project`);
+  const payload = res.data as any;
+
+  if (payload?.data?.project) {
+    return payload.data.project as Project;
+  }
+
+  if (payload?.data) {
+    return payload.data as Project;
+  }
+
+  if (payload?.project) {
+    return payload.project as Project;
+  }
+
+  if (payload?.data?.data) {
+    return payload.data.data as Project;
+  }
+
+  return payload as Project;
+};
+
 export const listProjectsForUser = async (
   userId: string,
   page = 1,
@@ -129,9 +152,17 @@ export const createProject = async (
 
 export const updateProject = async (
   id: string,
-  payload: Partial<CreateProjectPayload>
+  payload: Partial<CreateProjectPayload>,
+  files: File[]
 ): Promise<Project> => {
-  const res = await api.patch(`/projects/${id}`, payload);
+  const formData = new FormData();
+  formData.append("project", JSON.stringify(payload));
+
+  files.forEach((file) => {
+    formData.append("documents", file);
+  });
+
+  const res = await api.patch(`/project/update-project/${id}`, formData);
   return res.data.data;
 };
 
