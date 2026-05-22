@@ -73,46 +73,46 @@ function Login() {
 
     return (
         <>
-<div className="w-full lg:h-screen lg:overflow-hidden">
+<div className="w-full lg:h-screen">
         <div className="flex flex-wrap h-full">
             {/* <!-- Left Side - Image Grid (hidden on mobile) --> */}
-            <div className="hidden lg:block lg:w-8/12 bg-[#EDF3FF] rounded-[20px] p-1">
-                <div className="flex flex-wrap">
+            <div className="hidden lg:flex lg:w-8/12 bg-[#EDF3FF] rounded-[20px] p-1 h-full">
+                <div className="flex w-full h-full">
                     {/* <!-- Column 1 --> */}
-                    <div className="w-2/12 pr-1">
-                        <div className="mt-[5px]">
-                            <img src={img1} alt="" className="w-full h-[177px] rounded-[20px_20px_20px_0px] object-cover" />
+                    <div className="w-2/12 pr-1 flex flex-col">
+                        <div className="mt-[5px] flex-[177]">
+                            <img src={img1} alt="" className="w-full h-full rounded-[20px_20px_20px_0px] object-cover" />
                         </div>
-                        <div className="mt-[5px]">
-                            <img src={img2} alt="" className="w-full h-[288px] rounded-[0px_20px_20px_0px] object-cover" />
+                        <div className="mt-[5px] flex-[288]">
+                            <img src={img2} alt="" className="w-full h-full rounded-[0px_20px_20px_0px] object-cover" />
                         </div>
-                        <div className="mt-[5px]">
-                            <img src={img3} alt="" className="w-full h-[288px] rounded-[0px_20px_20px_20px] object-cover" />
+                        <div className="mt-[5px] flex-[288]">
+                            <img src={img3} alt="" className="w-full h-full rounded-[0px_20px_20px_20px] object-cover" />
                         </div>
                     </div>
                     {/* <!-- Column 2 - Box + Images --> */}
-                    <div className="w-4/12 pr-1">
-                        <div className="mt-[5px] bg-gradient-blue p-[30px] rounded-[20px] text-white h-[288px]">
+                    <div className="w-4/12 pr-1 flex flex-col">
+                        <div className="mt-[5px] flex-[288] bg-gradient-blue p-[30px] rounded-[20px] text-white">
                             <h4 className="font-raleway font-semibold text-[22px] leading-[40px] tracking-[0%]">Welcome To</h4>
                             <h3 className="font-raleway font-extrabold text-[36px] leading-[100%] tracking-[0%] align-middle">ProjectHub</h3>
                             <p className="font-poppins font-normal text-[14px] leading-[24px] tracking-[0%] mt-[10px]">Manage projects, collaborate with developers, track progress, and organize documents from one modern dashboard</p>
                         </div>
-                        <div className="mt-[5px]">
-                            <img src={img4} alt="" className="w-full h-[288px] rounded-[20px] object-cover" />
+                        <div className="mt-[5px] flex-[288]">
+                            <img src={img4} alt="" className="w-full h-full rounded-[20px] object-cover" />
                         </div>
-                        <div className="mt-[5px]">
-                            <img src={img5} alt="" className="w-full h-[183px] rounded-[20px_20px_0px_0px] object-cover" />
+                        <div className="mt-[5px] flex-[183]">
+                            <img src={img5} alt="" className="w-full h-full rounded-[20px_20px_0px_0px] object-cover" />
                         </div>
                     </div>
                     {/* <!-- Column 3 --> */}
-                    <div className="w-4/12 pr-1">
-                        <div className="mt-[5px]">
-                            <img src={img6} alt="" className="w-full h-[65px] rounded-[0px_0px_20px_20px] object-cover" />
+                    <div className="w-4/12 pr-1 flex flex-col">
+                        <div className="mt-[5px] flex-[65]">
+                            <img src={img6} alt="" className="w-full h-full rounded-[0px_0px_20px_20px] object-cover" />
                         </div>
-                        <div className="mt-[5px]">
-                            <img src={img7} alt="" className="w-full h-[288px] rounded-[20px] object-cover" />
+                        <div className="mt-[5px] flex-[288]">
+                            <img src={img7} alt="" className="w-full h-full rounded-[20px] object-cover" />
                         </div>
-                        <div className="mt-[5px] bg-gradient-blue p-[40px] rounded-[20px] text-white h-[288px] flex flex-col items-start justify-start text-center">
+                        <div className="mt-[5px] flex-[288] bg-gradient-blue p-[40px] rounded-[20px] text-white flex flex-col items-start justify-start text-center">
                             <h3 className="font-poppins font-bold text-[40px] leading-[100%] tracking-[0%]">120+</h3>
                             <p className="font-poppins font-medium text-[16px] leading-[100%] tracking-[0%]">Active Projects</p>
                             <br />
@@ -120,20 +120,20 @@ function Login() {
                             <h3 className="font-poppins font-bold text-[40px] leading-[100%] tracking-[0%]">50+</h3>
                             <p className="font-poppins font-medium text-[16px] leading-[100%] tracking-[0%]">Team Members</p>
                         </div>
-                        <div className="mt-[5px]">
-                            <img src={img8} alt="" className="w-full h-[113px] rounded-[20px_20px_0px_0px] object-cover" />
+                        <div className="mt-[5px] flex-[113]">
+                            <img src={img8} alt="" className="w-full h-full rounded-[20px_20px_0px_0px] object-cover" />
                         </div>
                     </div>
                     {/* <!-- Column 4 --> */}
-                    <div className="w-2/12">
-                        <div className="mt-[5px]">
-                            <img src={img9} alt="" className="w-full h-[178px] rounded-[0px_20px_0px_20px] object-cover" />
+                    <div className="w-2/12 flex flex-col">
+                        <div className="mt-[5px] flex-[178]">
+                            <img src={img9} alt="" className="w-full h-full rounded-[0px_20px_0px_20px] object-cover" />
                         </div>
-                        <div className="mt-[5px]">
-                            <img src={img10} alt="" className="w-full h-[288px] rounded-[20px_0px_0px_20px] object-cover" />
+                        <div className="mt-[5px] flex-[288]">
+                            <img src={img10} alt="" className="w-full h-full rounded-[20px_0px_0px_20px] object-cover" />
                         </div>
-                        <div className="mt-[5px]">
-                            <img src={img11} alt="" className="w-full h-[288px] rounded-[20px_0px_20px_20px] object-cover" />
+                        <div className="mt-[5px] flex-[288]">
+                            <img src={img11} alt="" className="w-full h-full rounded-[20px_0px_20px_20px] object-cover" />
                         </div>
                     </div>
                 </div>
