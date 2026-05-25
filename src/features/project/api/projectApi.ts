@@ -162,6 +162,14 @@ export const assignProjectUsers = async (
   return res.data;
 };
 
+export const getAssignableUsers = async () => {
+  const res = await api.get(
+    "/project/assignable-users"
+  );
+
+  return res.data.data;
+};
+
 export const updateProject = async (
   id: string,
   payload: Partial<CreateProjectPayload>,

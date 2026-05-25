@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { createProject, updateProject, assignProjectUsers, } from "./api/projectApi";
+import { createProject, updateProject, assignProjectUsers, getAssignableUsers } from "./api/projectApi";
 import api from "../../api/axios";
 import { showSuccessToast, showErrorToast } from "../../utils/toast";
 
@@ -82,8 +82,7 @@ export default function ProjectFormInline({
 
   const [isAssignedOpen, setIsAssignedOpen] = useState(false);
   const [assignedTo, setAssignedTo] = useState<string[]>([]);
-  const assignedOptions = ["John", "Rahul", "Priya", "Admin"];
-
+  const [assignedOptions, setAssignedOptions] = useState<any[]>([]);
   const handleAssignedChange = (value: string) => {
     setAssignedTo((prev) =>
       prev.includes(value)
@@ -147,6 +146,30 @@ export default function ProjectFormInline({
       setDocuments([]);
     }
   }, [project, reset]);
+
+  useEffect(() => {
+
+  const fetchAssignableUsers = async () => {
+
+    try {
+
+      const users = await getAssignableUsers();
+
+      setAssignedOptions(users || []);
+
+    } catch (error) {
+
+      console.error(
+        "Failed to fetch assignable users",
+        error
+      );
+
+    }
+  };
+
+  fetchAssignableUsers();
+
+}, []);
 
   const validateUrl = (value: any) => {
     if (!value || typeof value !== "string") return true;
@@ -240,12 +263,9 @@ export default function ProjectFormInline({
         .filter((f): f is File => !!f)
 );
 
-// assign users after project creation
 await assignProjectUsers(
     createdProject.id,
-    [
-        "48f62c45-54b5-4c3e-8261-6a25b6daf809"
-    ]
+    assignedTo
 );
 
 showSuccessToast("Project created and assigned successfully.");
@@ -335,18 +355,26 @@ showSuccessToast("Project created and assigned successfully.");
                 {/* Selected Cards */}
                 {assignedTo.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2">
-                    {assignedTo.map((person) => (
+                   {assignedTo.map((personId) => {
+
+                    const user = assignedOptions.find(
+                      (u: any) => u.id === personId
+                    );
+
+                    return (
                       <div
-                        key={person}
+                        key={personId}
                         className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
                       >
-                        {person}
+                        {user?.name}
+
                         {!isViewOnly && (
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleAssignedChange(person);
+
+                              handleAssignedChange(personId);
                             }}
                             className="ml-1"
                           >
@@ -354,7 +382,8 @@ showSuccessToast("Project created and assigned successfully.");
                           </button>
                         )}
                       </div>
-                    ))}
+                    );
+                  })}
                   </div>
                 )}
 
@@ -373,18 +402,20 @@ showSuccessToast("Project created and assigned successfully.");
                 {/* Dropdown Options */}
                 {isAssignedOpen && (
                   <div className="absolute mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-10 p-3">
-                    {assignedOptions.map((option) => (
+                    {assignedOptions.map((option: any) => (
                       <label
-                        key={option}
+                        key={option.id}
                         className="flex items-center gap-2 py-2"
                       >
                         <input
                           type="checkbox"
-                          checked={assignedTo.includes(option)}
-                          onChange={() => handleAssignedChange(option)}
+                          checked={assignedTo.includes(option.id)}
+                         onChange={() =>
+                                handleAssignedChange(option.id)
+                              }
                           disabled={isViewOnly}
                         />
-                        {option}
+                        {option.name}
                       </label>
                     ))}
                   </div>
