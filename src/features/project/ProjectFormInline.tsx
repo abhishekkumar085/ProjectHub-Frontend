@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { createProject, updateProject } from "./api/projectApi";
+import { createProject, updateProject, assignProjectUsers, } from "./api/projectApi";
 import api from "../../api/axios";
 import { showSuccessToast, showErrorToast } from "../../utils/toast";
 
@@ -233,11 +233,22 @@ export default function ProjectFormInline({
       const payload: CreateProjectPayload = { ...data, developers };
 
       if (!isEditing) {
-        await createProject(
-          payload,
-          documents.map((doc) => doc.file).filter((f): f is File => !!f),
-        );
-        showSuccessToast("Project created successfully.");
+        const createdProject = await createProject(
+    payload,
+    documents
+        .map((doc) => doc.file)
+        .filter((f): f is File => !!f)
+);
+
+// assign users after project creation
+await assignProjectUsers(
+    createdProject.id,
+    [
+        "48f62c45-54b5-4c3e-8261-6a25b6daf809"
+    ]
+);
+
+showSuccessToast("Project created and assigned successfully.");
       } else if (project) {
         await updateProject(
           project.id,

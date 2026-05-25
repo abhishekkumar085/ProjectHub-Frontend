@@ -150,6 +150,18 @@ export const createProject = async (
   return res.data.data;
 };
 
+export const assignProjectUsers = async (
+  projectId: string,
+  userIds: string[]
+) => {
+  const res = await api.post(
+    `/project/${projectId}/assign`,
+    { userIds }
+  );
+
+  return res.data;
+};
+
 export const updateProject = async (
   id: string,
   payload: Partial<CreateProjectPayload>,
