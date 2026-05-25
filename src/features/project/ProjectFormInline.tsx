@@ -507,7 +507,7 @@ showSuccessToast("Project created and assigned successfully.");
                   env.name as keyof CreateProjectPayload,
                 ) as string;
                 return (
-                  <div className=" px-2 py-1 bg-white border border-[#E5E5E5] rounded-lg">
+                  <div className=" px-2 py-0 bg-white border border-[#E5E5E5] rounded-lg">
                     <div
                       key={env.name}
                       className="grid gap-3 sm:grid-cols-[80px_1fr_auto] flex justify-center items-center"
@@ -559,7 +559,10 @@ showSuccessToast("Project created and assigned successfully.");
                 <button
                   type="button"
                   onClick={addDeveloper}
-                  className="rounded-xl border border-slate-300 px-4 py-2"
+                  className="rounded-xl border border-[#0059FF] bg-white px-4 py-2 
+             font-[Poppins] font-medium text-[14px] 
+             leading-[100%] tracking-[0px] text-center align-middle 
+             text-[#0059FF] hover:bg-blue-50 transition"
                 >
                   Add
                 </button>
