@@ -76,15 +76,19 @@ function ViewDetails() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/managers", label: "Users" }, { label: "User Details" }]} />
-          <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
-            User Details
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Review the manager profile and project assignments.
-          </p>
+          <Breadcrumb
+            items={[
+              { to: "/", label: "Home" },
+              { to: "/managers", label: "Users" },
+              { label: "User Details" },
+            ]}
+          />
         </div>
-
+      </div>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mt-2 mb-3">
+        <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
+          User Details
+        </h2>
         <button
           onClick={() => navigate("/managers")}
           className="inline-flex items-center gap-2 px-4 py-2 
@@ -96,7 +100,6 @@ function ViewDetails() {
           Back
         </button>
       </div>
-
       {/* Loading / Error */}
       {loading ? (
         <div className="p-10 text-center text-slate-600">Loading...</div>

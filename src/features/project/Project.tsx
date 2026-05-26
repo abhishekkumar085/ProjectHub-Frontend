@@ -16,8 +16,6 @@ import type { Project } from "./types/project.types";
 import { deleteProject, listProjects } from "./api/projectApi";
 import Pagination from "../../components/common/Pagination";
 
-
-
 function Projects() {
   // const [items, setItems] = useState<Project[]>([]);
   const [items, setItems] = useState<Project[]>([]);
@@ -43,7 +41,6 @@ function Projects() {
 
   // const userRole = user.role;
 
-
   const fetchProjects = async (requestedPage = page) => {
     try {
       setLoading(true);
@@ -64,9 +61,7 @@ function Projects() {
     fetchProjects();
   }, []);
 
-  const handleDelete = async (
-    id: string
-  ) => {
+  const handleDelete = async (id: string) => {
     await deleteProject(id);
 
     // refresh current page after deletion
@@ -87,7 +82,9 @@ function Projects() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold text-[#00076F]">Projects</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#00076F]">
+            Projects
+          </h2>
           <p className="text-sm text-slate-500">({total} results found)</p>
         </div>
 
@@ -123,22 +120,17 @@ function Projects() {
       {/* Table */}
       <div className="overflow-x-auto">
         {loading ? (
-          <div className="p-10 text-center">
-            Loading...
-          </div>
+          <div className="p-10 text-center">Loading...</div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-14 text-center">
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
               <FiFolder size={30} />
             </div>
 
-            <h3 className="text-lg font-semibold">
-              No projects yet
-            </h3>
+            <h3 className="text-lg font-semibold">No projects yet</h3>
 
             <p className="mt-2 max-w-md text-sm text-slate-500">
-              Create your first project to start
-              tracking work, developers, and
+              Create your first project to start tracking work, developers, and
               documents.
             </p>
           </div>
@@ -170,10 +162,7 @@ function Projects() {
 
             <tbody className="bg-white">
               {items.map((p, index) => (
-                <tr
-                  key={p.id}
-                  className="h-[45px] bg-white hover:bg-slate-50"
-                >
+                <tr key={p.id} className="h-[45px] bg-white hover:bg-slate-50 ">
                   <td className="w-[80px] pl-[30px] pr-4 py-2 text-sm font-normal text-[#444444] font-[Poppins] leading-none rounded-l-lg border-y border-l border-[#F5F5F5]">
                     {(page - 1) * limit + index + 1}
                   </td>
@@ -189,17 +178,32 @@ function Projects() {
                   <td className="pl-3 pr-4 py-2 text-sm font-normal text-[#444444] font-[Poppins] leading-none border-y border-[#F5F5F5]">
                     <div className="flex items-center gap-2 flex-wrap">
                       {p.devUrl && (
-                        <a href={p.devUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded bg-[#EEF4FF] px-2 py-1 text-xs font-medium text-[#0059FF]">
+                        <a
+                          href={p.devUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded bg-[#EEF4FF] px-2 py-1 text-xs font-medium text-[#0059FF]"
+                        >
                           DEV <FiExternalLink size={10} />
                         </a>
                       )}
                       {p.uatUrl && (
-                        <a href={p.uatUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded bg-[#FFF4E5] px-2 py-1 text-xs font-medium text-[#B76E00]">
+                        <a
+                          href={p.uatUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded bg-[#FFF4E5] px-2 py-1 text-xs font-medium text-[#B76E00]"
+                        >
                           UAT <FiExternalLink size={10} />
                         </a>
                       )}
                       {p.prodUrl && (
-                        <a href={p.prodUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded bg-[#E8F5E9] px-2 py-1 text-xs font-medium text-[#2E7D32]">
+                        <a
+                          href={p.prodUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded bg-[#E8F5E9] px-2 py-1 text-xs font-medium text-[#2E7D32]"
+                        >
                           PROD <FiExternalLink size={10} />
                         </a>
                       )}
@@ -213,13 +217,19 @@ function Projects() {
                     <div className="inline-flex items-center justify-center gap-2">
                       <button
                         onClick={() => navigate(`/projects/view/${p.id}`)}
-                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] gap-2 p-2 bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
+                        className="relative flex h-[32px] w-[32px] items-center justify-center rounded-[8px] bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
                       >
                         <FiEye size={16} />
-                      </button>
 
+                        {/* Red Dot */}
+                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                      </button>
                       <button
-                        onClick={() => navigate("/projects/add-edit", { state: { projectId: p.id } })}
+                        onClick={() =>
+                          navigate("/projects/add-edit", {
+                            state: { projectId: p.id },
+                          })
+                        }
                         className="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] gap-2 p-2 bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
                       >
                         <FiEdit2 size={16} />
