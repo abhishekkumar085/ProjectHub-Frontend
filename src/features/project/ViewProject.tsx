@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   Folder,
   FileText,
@@ -12,10 +12,14 @@ import {
   User,
 } from "lucide-react";
 import { FiArrowLeft, FiChevronRight } from "react-icons/fi";
+import { getProjectById } from "./api/projectApi";
+import type { Project } from "./types/project.types";
 
 function ViewProject() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
+  const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
@@ -26,8 +30,28 @@ function ViewProject() {
       return;
     }
 
-    setLoading(false);
-    setLoadError(null);
+    const fetchProject = async () => {
+      setLoading(true);
+      setLoadError(null);
+
+      try {
+        const data = await getProjectById(id);
+        if (!data) {
+          setLoadError("Project data not found.");
+          setProject(null);
+        } else {
+          setProject(data);
+        }
+      } catch (error: any) {
+        console.error("Failed to load project details:", error);
+        setLoadError(error?.message || "Failed to load project details.");
+        setProject(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProject();
   }, [id]);
 
   if (loading) {
@@ -46,22 +70,36 @@ function ViewProject() {
     );
   }
 
+  const getDocumentUrl = (doc: any) => {
+    const docBaseUrl = import.meta.env.VITE_DOC_VIEW_URL?.replace(/\/$/, "");
+    const rawUrl = doc?.url || doc?.path || doc?.fileUrl || "";
+
+    if (!rawUrl) return "";
+    if (String(rawUrl).startsWith("http")) return String(rawUrl);
+    if (docBaseUrl) {
+      const cleanPath = String(rawUrl).startsWith("/")
+        ? String(rawUrl).slice(1)
+        : String(rawUrl);
+      return `${docBaseUrl}/${cleanPath}`;
+    }
+    return String(rawUrl);
+  };
+
   const projectData = [
     {
       icon: <Folder size={20} className="text-blue-600" />,
       label: "PROJECT NAME",
-      value: "Developer Portal for ICICI website use by customer response",
+      value: project?.name || "-",
     },
     {
       icon: <FileText size={20} className="text-blue-600" />,
       label: "DESCRIPTION",
-      value:
-        "A secure and user-friendly Developer Portal for ICICI Bank that enables customers and businesses to explore, test, and integrate banking APIs seamlessly.",
+      value: project?.description || "-",
     },
     {
       icon: <Users size={20} className="text-blue-600" />,
       label: "DEVELOPERS",
-      value: "Yasmeen Hedge, Himanshu Gupta, Neha Sharma",
+      value: project?.developers?.join(", ") || "-",
     },
   ];
 
@@ -69,44 +107,41 @@ function ViewProject() {
     {
       icon: <Hourglass size={20} className="text-blue-600" />,
       label: "STATUS",
-      value: "In Progress",
+      value: project?.status || "-",
     },
     {
       icon: <ListOrdered size={20} className="text-blue-600" />,
       label: "PRIORITY",
-      value: "Medium",
+      value: project?.priority || "-",
     },
     {
       icon: <UserCircle size={20} className="text-blue-600" />,
       label: "CLIENT",
-      value: "Devika Ranade Manohar",
+      value: project?.clientName || "-",
     },
     {
       icon: <CalendarDays size={20} className="text-blue-600" />,
       label: "START DATE",
-      value: "20 May 2026",
+      value: project?.startDate
+        ? new Date(project.startDate).toLocaleDateString()
+        : "-",
     },
     {
       icon: <CalendarDays size={20} className="text-blue-600" />,
       label: "END DATE",
-      value: "25 May 2026",
+      value: project?.endDate
+        ? new Date(project.endDate).toLocaleDateString()
+        : "-",
     },
   ];
 
-  const files = [
-    {
-      name: "document-name.PDF",
-      type: "pdf",
-    },
-    {
-      name: "image-name-goes-here.png",
-      type: "image",
-    },
-    {
-      name: "image-name.png",
-      type: "image",
-    },
-  ];
+  const files = project?.documents?.map((doc: any) => ({
+    name:
+      doc?.originalName || doc?.name || doc?.filename ||
+      String(doc?.url || "").split("/").pop() || "Untitled",
+    url: getDocumentUrl(doc),
+    type: doc?.fileType || doc?.mimeType || "file",
+  })) || [];
 
   const remarksData = [
     {
@@ -142,7 +177,7 @@ function ViewProject() {
           Project Details
         </h1>{" "}
         <button
-          onClick={() => navigate("/managers")}
+          onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 px-4 py-2 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
         >
           <FiArrowLeft />
@@ -203,26 +238,37 @@ function ViewProject() {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {files.map((file, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between bg-[#EEF4FF] rounded-lg px-4 py-3"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 flex items-center justify-center">
-                  <FileText size={22} className="text-[#0059FF]" />
+          {files.length > 0 ? (
+            files.map((file, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between bg-[#EEF4FF] rounded-lg px-4 py-3"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 flex items-center justify-center">
+                    <FileText size={22} className="text-[#0059FF]" />
+                  </div>
+
+                  <p className="font-medium text-sm sm:text-base text-[#1E1E1E] truncate">
+                    {file.name}
+                  </p>
                 </div>
 
-                <p className="font-medium text-sm sm:text-base text-[#1E1E1E] truncate">
-                  {file.name}
-                </p>
+                <a
+                  href={file.url || "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ml-3"
+                >
+                  <Eye size={20} className="text-[#00076F]" />
+                </a>
               </div>
-
-              <button className="ml-3">
-                <Eye size={20} className="text-[#00076F]" />
-              </button>
+            ))
+          ) : (
+            <div className="rounded-2xl bg-[#f9fafc] px-4 py-6 text-sm text-slate-500">
+              No documents available
             </div>
-          ))}
+          )}
         </div>
       </div>
 

@@ -15,12 +15,16 @@ export type ProjectPriority =
 export interface ProjectDocument {
   url: any;
   id: string;
-  projectId: string;
-  filename: string;
-  originalName: string;
-  mimeType: string;
-  size: number;
-  uploadedAt: string;
+  projectId?: string;
+  filename?: string;
+  originalName?: string;
+  name?: string;
+  mimeType?: string;
+  fileType?: string;
+  fileSize?: string;
+  size?: number;
+  uploadedAt?: string;
+  createdAt?: string;
   file?: File;
 }
 

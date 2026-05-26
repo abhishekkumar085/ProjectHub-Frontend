@@ -9,9 +9,9 @@ interface Props {
 export default function ProjectDocumentsPanel({ documents, projectName }: Props) {
   const handleDownload = (doc: any) => {
     const link = document.createElement("a");
-
     link.href = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
-    link.download = doc.originalName;
+    const name = doc.originalName || doc.name || doc.filename || doc.file?.name || (doc.url ? String(doc.url).split('/').pop() : 'document');
+    link.download = name;
     link.click();
   };
 
@@ -37,7 +37,7 @@ export default function ProjectDocumentsPanel({ documents, projectName }: Props)
                 </div>
 
                 <div>
-                  <p className="font-medium text-slate-800">{doc.originalName}</p>
+                  <p className="font-medium text-slate-800">{doc.originalName || doc.name || doc.filename || doc.file?.name || (doc.url ? String(doc.url).split('/').pop() : 'Untitled')}</p>
                   <p className="text-xs text-slate-500">{doc.size ? `${(doc.size / 1024 / 1024).toFixed(2)} MB` : 'File'}</p>
                 </div>
               </div>

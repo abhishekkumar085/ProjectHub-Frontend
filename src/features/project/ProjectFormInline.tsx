@@ -232,6 +232,23 @@ export default function ProjectFormInline({
   };
 
   useEffect(() => {
+    const normalizeDoc = (d: any) => {
+      const urlStr = d?.url || d?.path || d?.fileUrl || d?.link || "";
+      const inferredFilename = d?.filename || d?.fileName || d?.name || (typeof urlStr === "string" ? urlStr.split("/").pop() : "") || "";
+
+      return {
+        id: d?.id || d?._id || d?.documentId || crypto.randomUUID(),
+        projectId: d?.projectId || d?.project_id || "",
+        filename: inferredFilename,
+        originalName: d?.originalName || d?.name || d?.fileName || d?.filename || d?.originalname || d?.label || inferredFilename,
+        mimeType: d?.mimeType || d?.mime_type || d?.type || "",
+        size: d?.size || d?.length || d?.file?.size || 0,
+        uploadedAt: d?.uploadedAt || d?.createdAt || d?.created_at || "",
+        url: d?.url || d?.path || d?.fileUrl || d?.link || "",
+        file: d?.file,
+      } as ProjectDocument;
+    };
+
     if (project) {
       reset({
         name: project.name,
@@ -247,7 +264,8 @@ export default function ProjectFormInline({
       });
 
       setDevelopers(project.developers || []);
-      setDocuments(project.documents || []);
+      const rawDocs = project.documents ?? [];
+      setDocuments((Array.isArray(rawDocs) ? rawDocs.map(normalizeDoc) : []));
       // prefer explicit assignedUsers array if provided by backend
       if (
         Array.isArray((project as any).assignedUsers) &&
@@ -773,26 +791,51 @@ export default function ProjectFormInline({
                       className="flex items-center justify-between rounded-[10px] bg-[#f5f5f5] px-4 py-[14px]"
                     >
                       {/* File Name */}
-                      <div className="flex items-center overflow-hidden">
-                        <p className="truncate text-[15px] font-normal text-[#3f3f3f]">
-                          {doc.originalName}
+                      <div className="flex flex-col overflow-hidden">
+                        <p
+                          className="text-[15px] font-normal text-[#3f3f3f] truncate"
+                          title={doc.originalName || doc.filename}
+                        >
+                          {doc.originalName || doc.filename}
                         </p>
+                        {doc.filename && doc.originalName !== doc.filename && (
+                          <p
+                            className="text-xs text-slate-500 truncate"
+                            title={doc.filename}
+                          >
+                            {doc.filename}
+                          </p>
+                        )}
                       </div>
 
-                      {/* Delete Icon */}
-                      {!isViewOnly && (
+                      {/* View (eye) and Delete Icons */}
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => removeDocument(doc.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewDocument(doc as any);
+                          }}
+                          title="View document"
                           className="flex h-7 w-7 items-center justify-center rounded-md bg-white"
                         >
-                          <FiTrash2
-                            size={14}
-                            className="text-[#ff4d4f]"
-                            strokeWidth={2.2}
-                          />
+                          <FiEye size={14} className="text-[#0059FF]" />
                         </button>
-                      )}
+
+                        {!isViewOnly && (
+                          <button
+                            type="button"
+                            onClick={() => removeDocument(doc.id)}
+                            className="flex h-7 w-7 items-center justify-center rounded-md bg-white"
+                          >
+                            <FiTrash2
+                              size={14}
+                              className="text-[#ff4d4f]"
+                              strokeWidth={2.2}
+                            />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -851,7 +894,7 @@ export default function ProjectFormInline({
                   Document Preview
                 </h2>
                 <p className="mt-1 text-sm text-slate-500 truncate">
-                  {previewDocument.originalName}
+                  {previewDocument?.originalName || (previewDocument as any)?.name || previewDocument?.filename || previewDocument?.file?.name || (previewDocument?.url ? String(previewDocument.url).split("/").pop() : "Untitled")}
                 </p>
               </div>
               <button
@@ -868,7 +911,7 @@ export default function ProjectFormInline({
                 </div>
               ) : previewUrl ? (
                 <iframe
-                  title={previewDocument?.originalName || "document-preview"}
+                  title={previewDocument?.originalName || (previewDocument as any)?.name || previewDocument?.filename || previewDocument?.file?.name || "document-preview"}
                   src={previewUrl}
                   className="h-full w-full rounded-b-2xl"
                 />
