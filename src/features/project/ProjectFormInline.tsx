@@ -199,7 +199,6 @@ export default function ProjectFormInline({
     register,
     handleSubmit,
     reset,
-    getValues,
     setError,
     clearErrors,
     formState: { errors },
@@ -245,12 +244,16 @@ export default function ProjectFormInline({
 
       setDevelopers(project.developers || []);
       setDocuments(project.documents || []);
-      if ((project as any).members && Array.isArray((project as any).members)) {
-        const assignedUserIds = (project as any).members.map(
-          (member: any) => member.assignedTo?.id
-        );
+      // prefer explicit assignedUsers array if provided by backend
+      if (Array.isArray((project as any).assignedUsers) && (project as any).assignedUsers.length > 0) {
+        setAssignedTo((project as any).assignedUsers);
+      } else if ((project as any).members && Array.isArray((project as any).members)) {
+        // fallback for older shape where members list contains assignedTo objects
+        const assignedUserIds = (project as any).members
+          .map((member: any) => member.assignedTo?.id)
+          .filter(Boolean);
 
-        setAssignedTo(assignedUserIds);
+        setAssignedTo(assignedUserIds as string[]);
       }
     } else {
       reset();
@@ -348,6 +351,7 @@ export default function ProjectFormInline({
         await createProject(
           payload,
           documents.map((doc) => doc.file).filter((f): f is File => !!f),
+          assignedTo.length ? assignedTo : undefined,
         );
         showSuccessToast("Project created successfully.");
       } else if (project) {
@@ -355,6 +359,7 @@ export default function ProjectFormInline({
           project.id,
           payload,
           documents.map((doc) => doc.file).filter((f): f is File => !!f),
+          assignedTo.length ? assignedTo : undefined,
         );
         showSuccessToast("Project updated successfully.");
       }
@@ -392,7 +397,7 @@ export default function ProjectFormInline({
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Project Name
-                <span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0px]">
+                <span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
                   *
                 </span>
               </label>
@@ -600,9 +605,6 @@ export default function ProjectFormInline({
                   color: "bg-green-100 text-green-700",
                 },
               ].map((env) => {
-                const envValue = getValues(
-                  env.name as keyof CreateProjectPayload,
-                ) as string;
                 return (
                   <div className=" px-2 py-0 bg-white border border-[#E5E5E5] rounded-lg">
                     <div
@@ -610,7 +612,7 @@ export default function ProjectFormInline({
                       className="grid gap-3 sm:grid-cols-[80px_1fr_auto] justify-center items-center"
                     >
                       <div
-                        className={`flex w-[55px] h-[30px] items-center justify-center rounded-[26px] px-4 py-[6px] text-xs font-bold ${env.color}`}
+                        className={`flex w-13.75 h-7.5 items-center justify-center rounded-[26px] px-4 py-1.5 text-xs font-bold ${env.color}`}
                       >
                         {env.label}
                       </div>
@@ -622,7 +624,7 @@ export default function ProjectFormInline({
                             validateUrl(value) || "Invalid URL",
                         })}
                         disabled={isViewOnly}
-                        className="w-full rounded-xl px-4 py-3 outline-none focus:outline-none font-[Poppins] placeholder:text-[#7A7A7A] placeholder:font-medium placeholder:text-[14px] placeholder:leading-[100%] placeholder:tracking-[0px]"
+                        className="w-full rounded-xl px-4 py-3 outline-none focus:outline-none font-[Poppins] placeholder:text-[#7A7A7A] placeholder:font-medium placeholder:text-[14px] placeholder:leading-[100%] placeholder:tracking-normal"
                         placeholder={
                           env.label === "DEV"
                             ? "Enter Dev URL"
@@ -666,7 +668,7 @@ export default function ProjectFormInline({
                   onClick={addDeveloper}
                   className="rounded-xl border border-[#0059FF] bg-white px-4 py-2 
              font-[Poppins] font-medium text-[14px] 
-             leading-[100%] tracking-[0px] text-center align-middle 
+             leading-[100%] tracking-normal text-center align-middle 
              text-[#0059FF] hover:bg-blue-50 transition"
                 >
                   Add
@@ -708,7 +710,7 @@ export default function ProjectFormInline({
 
             {!isViewOnly && (
               <div
-                className="w-[542px] h-[202px] border-2 border-dashed border-blue-400 rounded-2xl bg-[#F3F6FB] p-8 text-center cursor-pointer hover:bg-[#EEF4FF] transition"
+                className="w-135.5 h-50.5 border-2 border-dashed border-blue-400 rounded-2xl bg-[#F3F6FB] p-8 text-center cursor-pointer hover:bg-[#EEF4FF] transition"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                   e.preventDefault();
@@ -721,12 +723,12 @@ export default function ProjectFormInline({
                   <div className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-blue-500 text-blue-600 mb-4">
                     <FiUploadCloud size={28} />
                   </div>
-                  <p className="font-[Poppins] font-medium text-[16px] leading-[24px] tracking-[0%] text-center align-middle text-slate-800">
+                  <p className="font-[Poppins] font-medium text-[16px] leading-6 tracking-[0%] text-center align-middle text-slate-800">
                     Drag & drop files or{" "}
                     <span className="text-blue-600 underline">Browse</span>
                   </p>
 
-                  <p className="font-[Poppins] font-normal text-[12px] leading-[18px] tracking-[0%] text-center align-middle text-[#444444] mt-2">
+                  <p className="font-[Poppins] font-normal text-[12px] leading-4.5 tracking-[0%] text-center align-middle text-[#444444] mt-2">
                     Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI, Word,
                     PPT
                   </p>
@@ -797,9 +799,9 @@ export default function ProjectFormInline({
             {/* Cancel Button */}
             <button
               type="button"
-              className="w-[99px] h-[45px] px-[24px] py-[12px] rounded-[8px] border border-[#7A7A7A] 
+              className="w-24.75 h-11.25 px-6 py-3 rounded-lg border border-[#7A7A7A] 
                  bg-white font-[Poppins] font-medium text-[14px] 
-                 leading-[100%] tracking-[0px] text-center align-middle 
+                 leading-[100%] tracking-normal text-center align-middle 
                  text-[#7A7A7A] hover:bg-gray-50 transition"
             >
               Cancel
@@ -808,10 +810,10 @@ export default function ProjectFormInline({
             {/* Save Details Button */}
             <button
               type="submit"
-              className=" h-[45px] px-[24px] py-[12px] rounded-[8px] 
+              className=" h-11.25 px-6 py-3 rounded-lg 
                  bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] 
                  font-[Poppins] font-medium text-[14px] 
-                 leading-[100%] tracking-[0px] text-center align-middle 
+                 leading-[100%] tracking-normal text-center align-middle 
                  text-white 
                  shadow-[0px_2px_6px_rgba(0,0,0,0.15)] 
                  hover:opacity-90 transition"

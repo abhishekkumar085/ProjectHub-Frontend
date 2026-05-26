@@ -106,7 +106,7 @@ export const listProjectsForUser = async (
   };
 
   const dataProjects: Project[] | undefined =
-    payload?.data?.projects ?? payload?.data?.createdProjects;
+    payload?.data?.assignedProjects ?? payload?.data?.createdProjects;
   if (Array.isArray(dataProjects)) {
     const projects: Project[] = dataProjects;
     const total = payload?.data?.total ?? projects.length;
@@ -136,17 +136,20 @@ export const listProjectsForUser = async (
 
 export const createProject = async (
   payload: CreateProjectPayload,
-  files: File[]
+  files: File[],
+  assignedUsers?: string[],
 ): Promise<Project> => {
   const formData = new FormData();
 
+  // append project JSON without assignedUsers
   formData.append("project", JSON.stringify(payload));
 
   files.forEach((file) => {
     formData.append("documents", file);
   });
-  if (payload.assignedUsers && Array.isArray(payload.assignedUsers)) {
-    formData.append("assignedUsers", JSON.stringify(payload.assignedUsers));
+
+  if (assignedUsers && Array.isArray(assignedUsers)) {
+    formData.append("assignedUsers", JSON.stringify(assignedUsers));
   }
 
   const res = await api.post("/project/create-project", formData);
@@ -156,7 +159,8 @@ export const createProject = async (
 export const updateProject = async (
   id: string,
   payload: Partial<CreateProjectPayload>,
-  files: File[]
+  files: File[],
+  assignedUsers?: string[],
 ): Promise<Project> => {
   const formData = new FormData();
   formData.append("project", JSON.stringify(payload));
@@ -164,8 +168,9 @@ export const updateProject = async (
   files.forEach((file) => {
     formData.append("documents", file);
   });
-  if ((payload as any).assignedUsers && Array.isArray((payload as any).assignedUsers)) {
-    formData.append("assignedUsers", JSON.stringify((payload as any).assignedUsers));
+
+  if (assignedUsers && Array.isArray(assignedUsers)) {
+    formData.append("assignedUsers", JSON.stringify(assignedUsers));
   }
 
   const res = await api.patch(`/project/update-project/${id}`, formData);

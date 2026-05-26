@@ -41,7 +41,7 @@ function ViewDetails() {
         setLoading(true);
 
         const result = await listProjectsForUser(id);
-
+        console.log("API response for manager details:", result.projects);
         setManager(result.manager || null);
         setProjects(result.projects ?? []);
         console.log("Fetched manager details:", result.manager);
