@@ -106,7 +106,11 @@ export const listProjectsForUser = async (
   };
 
   const dataProjects: Project[] | undefined =
-    payload?.data?.assignedProjects ?? payload?.data?.createdProjects;
+    // new API may return assignedProjects with nested project objects
+    payload?.data?.projects ?? payload?.data?.createdProjects ??
+    (Array.isArray(payload?.data?.assignedProjects)
+      ? payload.data.assignedProjects.map((ap: any) => ap.project).filter(Boolean)
+      : undefined);
   if (Array.isArray(dataProjects)) {
     const projects: Project[] = dataProjects;
     const total = payload?.data?.total ?? projects.length;
