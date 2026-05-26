@@ -12,6 +12,7 @@ import {
   FiUser,
   FiX,
   FiEye,
+  FiArrowLeft,
 } from "react-icons/fi";
 import Breadcrumb from "../../components/common/Breadcrumb";
 import type {
@@ -53,7 +54,11 @@ export default function ProjectFormInline({
 }: Props) {
   const isEditing = !!project || !!isEditMode;
   const isViewOnly = !!isViewMode;
-  const pageTitle = isViewOnly ? "View Project" : isEditing ? "Edit Project" : "Add Project";
+  const pageTitle = isViewOnly
+    ? "View Project"
+    : isEditing
+      ? "Edit Project"
+      : "Add Project";
   const [previewDocument, setPreviewDocument] =
     useState<ProjectDocument | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -244,13 +249,25 @@ export default function ProjectFormInline({
   useEffect(() => {
     const normalizeDoc = (d: any) => {
       const urlStr = d?.url || d?.path || d?.fileUrl || d?.link || "";
-      const inferredFilename = d?.filename || d?.fileName || d?.name || (typeof urlStr === "string" ? urlStr.split("/").pop() : "") || "";
- 
+      const inferredFilename =
+        d?.filename ||
+        d?.fileName ||
+        d?.name ||
+        (typeof urlStr === "string" ? urlStr.split("/").pop() : "") ||
+        "";
+
       return {
         id: d?.id || d?._id || d?.documentId || crypto.randomUUID(),
         projectId: d?.projectId || d?.project_id || "",
         filename: inferredFilename,
-        originalName: d?.originalName || d?.name || d?.fileName || d?.filename || d?.originalname || d?.label || inferredFilename,
+        originalName:
+          d?.originalName ||
+          d?.name ||
+          d?.fileName ||
+          d?.filename ||
+          d?.originalname ||
+          d?.label ||
+          inferredFilename,
         mimeType: d?.mimeType || d?.mime_type || d?.type || "",
         size: d?.size || d?.length || d?.file?.size || 0,
         uploadedAt: d?.uploadedAt || d?.createdAt || d?.created_at || "",
@@ -275,7 +292,7 @@ export default function ProjectFormInline({
  
       setDevelopers(project.developers || []);
       const rawDocs = project.documents ?? [];
-      setDocuments((Array.isArray(rawDocs) ? rawDocs.map(normalizeDoc) : []));
+      setDocuments(Array.isArray(rawDocs) ? rawDocs.map(normalizeDoc) : []);
       // prefer explicit assignedUsers array if provided by backend
       if (
         Array.isArray((project as any).assignedUsers) &&
@@ -420,12 +437,29 @@ export default function ProjectFormInline({
   return (
     <div className="">
       <div className=" ">
-        <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/projects", label: "Projects" }, { label: pageTitle }]} />
- 
-        <h2 className="text-[20px] font-semibold leading-[100%] tracking-[0%] text-[#00076F] font-[Poppins] mb-4">
-          {pageTitle}
-        </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <Breadcrumb
+          items={[
+            { to: "/", label: "Home" },
+            { to: "/projects", label: "Projects" },
+            { label: pageTitle },
+          ]}
+        />
+
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 ">
+          <h1 className="mt-5 font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-[0px] text-[#00076F]">
+            {pageTitle}
+          </h1>
+
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 px-4 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
+          >
+            <FiArrowLeft />
+            <span>Back</span>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-6">
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -466,73 +500,74 @@ export default function ProjectFormInline({
                   {errors.description.message}
                 </p>
               )}
-              {userRole == "ADMIN" && (<div className="relative">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Assigned To
-                </label>
- 
-                {/* Selected Cards */}
-                {assignedTo.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {assignedTo.map((userId) => {
-                      const u = assignedOptions.find((a) => a.id === userId);
-                      return (
-                        <div
-                          key={userId}
-                          className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+              {userRole == "ADMIN" && (
+                <div className="relative">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Assigned To
+                  </label>
+
+                  {/* Selected Cards */}
+                  {assignedTo.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {assignedTo.map((userId) => {
+                        const u = assignedOptions.find((a) => a.id === userId);
+                        return (
+                          <div
+                            key={userId}
+                            className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+                          >
+                            {u?.name || userId}
+                            {!isViewOnly && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAssignedChange(userId);
+                                }}
+                                className="ml-1"
+                              >
+                                <FiX size={14} />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Dropdown Button */}
+                  <div
+                    onClick={() =>
+                      !isViewOnly && setIsAssignedOpen(!isAssignedOpen)
+                    }
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 cursor-pointer bg-white"
+                  >
+                    {assignedTo.length > 0
+                      ? `${assignedTo.length} selected`
+                      : "Select Assigned To"}
+                  </div>
+
+                  {/* Dropdown Options */}
+                  {isAssignedOpen && (
+                    <div className="absolute mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-10 p-3">
+                      {assignedOptions.map((option) => (
+                        <label
+                          key={option.id}
+                          className="flex items-center gap-2 py-2"
                         >
-                          {u?.name || userId}
-                          {!isViewOnly && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAssignedChange(userId);
-                              }}
-                              className="ml-1"
-                            >
-                              <FiX size={14} />
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
- 
-                {/* Dropdown Button */}
-                <div
-                  onClick={() =>
-                    !isViewOnly && setIsAssignedOpen(!isAssignedOpen)
-                  }
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 cursor-pointer bg-white"
-                >
-                  {assignedTo.length > 0
-                    ? `${assignedTo.length} selected`
-                    : "Select Assigned To"}
+                          <input
+                            type="checkbox"
+                            checked={assignedTo.includes(option.id)}
+                            onChange={() => handleAssignedChange(option.id)}
+                            disabled={isViewOnly}
+                          />
+                          {option.name}
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
- 
-                {/* Dropdown Options */}
-                {isAssignedOpen && (
-                  <div className="absolute mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-10 p-3">
-                    {assignedOptions.map((option) => (
-                      <label
-                        key={option.id}
-                        className="flex items-center gap-2 py-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={assignedTo.includes(option.id)}
-                          onChange={() => handleAssignedChange(option.id)}
-                          disabled={isViewOnly}
-                        />
-                        {option.name}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>)}
- 
+              )}
             </div>
  
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -900,7 +935,13 @@ export default function ProjectFormInline({
                   Document Preview
                 </h2>
                 <p className="mt-1 text-sm text-slate-500 truncate">
-                  {previewDocument?.originalName || (previewDocument as any)?.name || previewDocument?.filename || previewDocument?.file?.name || (previewDocument?.url ? String(previewDocument.url).split("/").pop() : "Untitled")}
+                  {previewDocument?.originalName ||
+                    (previewDocument as any)?.name ||
+                    previewDocument?.filename ||
+                    previewDocument?.file?.name ||
+                    (previewDocument?.url
+                      ? String(previewDocument.url).split("/").pop()
+                      : "Untitled")}
                 </p>
               </div>
               <button
@@ -917,7 +958,13 @@ export default function ProjectFormInline({
                 </div>
               ) : previewUrl ? (
                 <iframe
-                  title={previewDocument?.originalName || (previewDocument as any)?.name || previewDocument?.filename || previewDocument?.file?.name || "document-preview"}
+                  title={
+                    previewDocument?.originalName ||
+                    (previewDocument as any)?.name ||
+                    previewDocument?.filename ||
+                    previewDocument?.file?.name ||
+                    "document-preview"
+                  }
                   src={previewUrl}
                   className="h-full w-full rounded-b-2xl"
                 />

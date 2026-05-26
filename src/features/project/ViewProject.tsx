@@ -101,7 +101,9 @@ function ViewProject() {
       } catch (error) {
         console.error("Failed to load preview blob", error);
         setPreviewUrl("");
-        setPreviewError("Unable to preview this document in the embedded frame.");
+        setPreviewError(
+          "Unable to preview this document in the embedded frame.",
+        );
       } finally {
         setPreviewLoading(false);
       }
@@ -163,7 +165,8 @@ function ViewProject() {
   }
 
   const assignedToList: string[] =
-    project?.members?.map((m: any) => m?.assignedTo?.name).filter(Boolean) || [];
+    project?.members?.map((m: any) => m?.assignedTo?.name).filter(Boolean) ||
+    [];
   const currentUser = (() => {
     try {
       return JSON.parse(localStorage.getItem("user") || "null");
@@ -267,24 +270,30 @@ function ViewProject() {
 
   return (
     <div className="space-y-6">
-      <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/projects", label: "Projects" }, { label: "Project Details" }]} />
+      <Breadcrumb
+        items={[
+          { to: "/", label: "Home" },
+          { to: "/projects", label: "Projects" },
+          { label: "Project Details" },
+        ]}
+      />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 ">
         <h1 className="mt-5 font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-[0px] text-[#00076F]">
           Project Details
         </h1>
 
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 px-4 py-2 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
         >
           <FiArrowLeft />
           <span>Back</span>
         </button>
       </div>
       <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-3 mt-3">
+        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-3">
           Basic Information
         </h1>
 
@@ -296,20 +305,20 @@ function ViewProject() {
               </div>
 
               <div className="flex-1 space-y-2">
-                    <p className="font-medium text-xs uppercase text-[#7A7A7A]">
-                      {item.label}
-                    </p>
+                <p className="font-medium text-xs uppercase text-[#7A7A7A]">
+                  {item.label}
+                </p>
 
-                    {typeof item.value === "string" ? (
-                      <p className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
-                        {item.value}
-                      </p>
-                    ) : (
-                      <div className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
-                        {item.value}
-                      </div>
-                    )}
+                {typeof item.value === "string" ? (
+                  <p className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
+                    {item.value}
+                  </p>
+                ) : (
+                  <div className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
+                    {item.value}
                   </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -336,34 +345,54 @@ function ViewProject() {
         </div>
       </div>
 
-        {previewDocument && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
-            <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
-              <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4">
-                <div className="min-w-0">
-                  <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Document Preview</h2>
-                  <p className="mt-1 text-sm text-slate-500 truncate">{previewDocument?.originalName || previewDocument?.name || previewDocument?.filename || (previewDocument?.url ? String(previewDocument.url).split("/").pop() : "Untitled")}</p>
+      {previewDocument && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
+          <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4">
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
+                  Document Preview
+                </h2>
+                <p className="mt-1 text-sm text-slate-500 truncate">
+                  {previewDocument?.originalName ||
+                    previewDocument?.name ||
+                    previewDocument?.filename ||
+                    (previewDocument?.url
+                      ? String(previewDocument.url).split("/").pop()
+                      : "Untitled")}
+                </p>
+              </div>
+              <button
+                onClick={() => setPreviewDocument(null)}
+                className="rounded-lg p-2 hover:bg-slate-100"
+              >
+                <FiX size={20} />
+              </button>
+            </div>
+            <div className="h-[60vh] sm:h-[75vh] bg-slate-100">
+              {previewLoading ? (
+                <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                  Loading document preview...
                 </div>
-                <button onClick={() => setPreviewDocument(null)} className="rounded-lg p-2 hover:bg-slate-100">
-                  <FiX size={20} />
-                </button>
-              </div>
-              <div className="h-[60vh] sm:h-[75vh] bg-slate-100">
-                {previewLoading ? (
-                  <div className="flex h-full items-center justify-center text-sm text-slate-500">Loading document preview...</div>
-                ) : previewUrl ? (
-                  <iframe title={previewDocument?.originalName || "document-preview"} src={previewUrl} className="h-full w-full rounded-b-2xl" />
-                ) : previewError ? (
-                  <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-sm text-slate-500">
-                    <p className="text-center">{previewError}</p>
-                  </div>
-                ) : (
-                  <div className="flex h-full items-center justify-center text-sm text-slate-500">Document preview is not available for this file.</div>
-                )}
-              </div>
+              ) : previewUrl ? (
+                <iframe
+                  title={previewDocument?.originalName || "document-preview"}
+                  src={previewUrl}
+                  className="h-full w-full rounded-b-2xl"
+                />
+              ) : previewError ? (
+                <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-sm text-slate-500">
+                  <p className="text-center">{previewError}</p>
+                </div>
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                  Document preview is not available for this file.
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
       {/* Documents Card */}
       <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
@@ -374,7 +403,14 @@ function ViewProject() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {docs.length > 0 ? (
             docs.map((doc: any, index: number) => {
-              const name = doc?.originalName || doc?.name || doc?.filename || String(doc?.url || "").split("/").pop() || "Untitled";
+              const name =
+                doc?.originalName ||
+                doc?.name ||
+                doc?.filename ||
+                String(doc?.url || "")
+                  .split("/")
+                  .pop() ||
+                "Untitled";
               return (
                 <div
                   key={doc.id || index}
