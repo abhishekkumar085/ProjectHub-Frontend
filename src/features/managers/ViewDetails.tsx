@@ -67,13 +67,16 @@ function ViewDetails() {
             Review the manager profile and project assignments.
           </p>
         </div>
-
         <button
           onClick={() => navigate("/managers")}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2 
+             font-[Poppins] font-medium text-[14px] 
+             leading-[120%] tracking-[-0.01em] 
+             text-[#7A7A7A] hover:bg-slate-50 
+             self-start sm:self-auto"
         >
           <FiArrowLeft />
-          <span className="hidden sm:inline">Back to managers</span>
+          <span className="hidden sm:inline">Back</span>
           <span className="sm:hidden">Back</span>
         </button>
       </div>

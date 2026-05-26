@@ -325,7 +325,12 @@ function AddManager() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-[135px] h-[45px] rounded-[8px] border border-[1px] 
+             bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] 
+             px-6 py-3 font-[Poppins] font-medium text-[14px] 
+             leading-[100%] tracking-[0px] text-center align-middle 
+             text-white transition hover:opacity-90 
+             disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "Saving..." : "Save"}
           </button>
