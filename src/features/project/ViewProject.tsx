@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import {
   Folder,
   FileText,
@@ -11,6 +11,7 @@ import {
   Eye,
   User,
 } from "lucide-react";
+import { FiChevronRight } from "react-icons/fi";
 
 function ViewProject() {
   const { id } = useParams<{ id: string }>();
@@ -125,9 +126,19 @@ function ViewProject() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1 text-sm font-[Poppins] mb-2">
+        <Link to="/" className="text-[#0059FF] hover:underline">
+          Home
+        </Link>
+        <FiChevronRight size={14} className="text-slate-400" />
+        <span className="text-slate-500">Users</span>
+        <FiChevronRight size={14} className="text-slate-400" />
+        <span className="text-slate-500">Project Details</span>
+      </nav>
       {/* Basic Information Card */}
       <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-        <h1 className="font-semibold text-[16px] text-[#161616] mb-4">
+        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
           Basic Information
         </h1>
 
@@ -175,7 +186,7 @@ function ViewProject() {
 
       {/* Documents Card */}
       <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-        <h1 className="font-semibold text-[16px] text-[#161616] mb-4">
+        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
           Documents
         </h1>
 
@@ -205,7 +216,7 @@ function ViewProject() {
 
       {/* Remarks Card */}
       <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-        <h1 className="font-semibold text-[16px] text-[#161616] mb-4">
+        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
           Remarks
         </h1>
 
