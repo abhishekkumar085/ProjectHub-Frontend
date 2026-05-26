@@ -6,22 +6,38 @@ import {
   FiMail,
   FiPhone,
   FiUser,
+  FiUsers,
+  FiCalendar,
+  FiFileText,
+  FiLink,
+  FiChevronDown,
 } from "react-icons/fi";
+
 import type { Project } from "../project/types/project.types";
 import { listProjectsForUser } from "../project/api/projectApi";
 import StatusBadge from "../project/StatusBadge";
 import PriorityBadge from "../project/PriorityBadge";
 
+interface Manager {
+  name?: string;
+  designation?: string;
+  email?: string;
+  empId?: string;
+  mobileNumber?: string;
+}
+
 function ViewDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [manager, setManager] = useState<any>(null);
+
+  const [manager, setManager] = useState<Manager | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const formatDate = (value?: string | null) => {
     if (!value) return "—";
+
     return new Date(value).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
@@ -41,12 +57,10 @@ function ViewDetails() {
         setLoading(true);
 
         const result = await listProjectsForUser(id);
-        console.log("API response for manager details:", result.projects);
+
         setManager(result.manager || null);
         setProjects(result.projects ?? []);
-        console.log("Fetched manager details:", result.manager);
-        console.log("Fetched projects for manager:", result.projects);
-      } catch (err) {
+      } catch {
         setError("Unable to load manager details. Please try again.");
       } finally {
         setLoading(false);
@@ -57,8 +71,9 @@ function ViewDetails() {
   }, [id]);
 
   return (
-    <div className="">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 ">
+    <div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
             User Details
@@ -67,84 +82,81 @@ function ViewDetails() {
             Review the manager profile and project assignments.
           </p>
         </div>
+
         <button
           onClick={() => navigate("/managers")}
           className="inline-flex items-center gap-2 px-4 py-2 
-             font-[Poppins] font-medium text-[14px] 
-             leading-[120%] tracking-[-0.01em] 
-             text-[#7A7A7A] hover:bg-slate-50 
-             self-start sm:self-auto"
+          font-[Poppins] font-medium text-[14px] leading-[120%]
+          tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 
+          rounded-lg"
         >
           <FiArrowLeft />
-          <span className="hidden sm:inline">Back</span>
-          <span className="sm:hidden">Back</span>
+          Back
         </button>
       </div>
 
+      {/* Loading / Error */}
       {loading ? (
         <div className="p-10 text-center text-slate-600">Loading...</div>
       ) : error ? (
         <div className="p-10 text-center text-red-600">{error}</div>
       ) : (
         <div className="space-y-6 mt-3">
-          {/* Top Manager Card */}
+          {/* Manager Card */}
           <section className="rounded-[24px] bg-[#0059FF] px-6 py-5 text-white shadow-lg">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              {/* Left User Info */}
+              {/* User Info */}
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#0059FF]">
                   <FiUser size={22} />
                 </div>
 
                 <div>
-                  <h3 className="text-[18px] font-semibold">{manager?.name}</h3>
+                  <h3 className="text-[18px] font-semibold">
+                    {manager?.name || "—"}
+                  </h3>
                   <p className="text-sm text-blue-100">
-                    {manager?.designation}
+                    {manager?.designation || "—"}
                   </p>
                 </div>
               </div>
 
-              {/* Inline Details */}
+              {/* Inline Info */}
               <div className="flex flex-wrap items-center gap-[20px] text-sm text-white">
                 <div className="flex items-center gap-2">
                   <FiMail className="text-white/80" />
-                  <span>{manager?.email}</span>
+                  <span>{manager?.email || "—"}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <FiBriefcase className="text-white/80" />
-                  <span>{manager?.empId}</span>
+                  <span>{manager?.empId || "—"}</span>
                 </div>
 
                 <div className="flex items-center gap-2">
                   <FiPhone className="text-white/80" />
-                  <span>{manager?.mobileNumber ?? "No mobile number"}</span>
+                  <span>{manager?.mobileNumber || "No mobile number"}</span>
                 </div>
               </div>
 
-              {/* Project Count Pill */}
+              {/* Project Count */}
               <div className="rounded-full bg-white px-5 py-2 text-sm font-medium text-slate-800 shadow">
-                {projects.length} Assigned project
-                {projects.length === 1 ? "" : "s"}
+                {projects.length} Assigned Project
+                {projects.length !== 1 ? "s" : ""}
               </div>
             </div>
           </section>
 
-          {/* Projects Section */}
-          <section className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">
-                  Projects
-                </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  Details for projects connected to this manager.
-                </p>
-              </div>
-            </div>
-
+          {/* Projects */}
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">Projects</h3>
+            {/* <p className="mt-1 text-sm text-slate-500">
+              Details for projects connected to this manager.
+            </p> */}
+          </div>
+          <section className="">
             {projects.length === 0 ? (
-              <div className="mt-8 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-slate-500">
+              <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-slate-500">
                 No projects found for this manager.
               </div>
             ) : (
@@ -152,79 +164,140 @@ function ViewDetails() {
                 {projects.map((project) => (
                   <details
                     key={project.id}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                    className="group w-full overflow-hidden bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]"
                   >
-                    <summary className="flex cursor-pointer flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 bg-white px-4 py-4 text-sm font-medium text-slate-900 hover:bg-slate-100">
+                    {/* Accordion Header */}
+                    <summary className="flex cursor-pointer items-start justify-between gap-4 px-5 py-4 list-none rounded-2xl hover:bg-slate-50 group-open:rounded-b-none">
                       <div className="min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">
+                        <h4 className="truncate text-[15px] font-semibold text-slate-900">
                           {project.name}
-                        </p>
-                        <p className="text-sm text-slate-500 truncate">
-                          {project.description ?? "No description available."}
-                        </p>
+                        </h4>
+
+                        {/* <p className="mt-1 truncate text-sm text-slate-500">
+        {project.description || "No description available."}
+      </p> */}
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 shrink-0">
-                        <StatusBadge status={project.status} />
+                      <div className="flex items-center gap-2 shrink-0">
                         <PriorityBadge priority={project.priority} />
+                        <StatusBadge status={project.status} />
+
+                        <FiChevronDown className="h-5 w-5 text-slate-400 transition-transform duration-300 group-open:rotate-180" />
                       </div>
                     </summary>
 
-                    <div className="border-t border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-600">
-                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        <div>
-                          <p className="text-xs uppercase text-slate-400">
-                            Client
-                          </p>
-                          <p className="mt-1 text-slate-900">
-                            {project.clientName ?? "—"}
-                          </p>
+                    {/* Accordion Body */}
+                    <div className="border-t border-[#E5E7EB] px-6 py-5">
+                      <div className="grid grid-cols-1 gap-y-6 gap-x-10 md:grid-cols-2 xl:grid-cols-3">
+                        {/* Client */}
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                            <FiUser className="text-[18px] text-[#0059FF]" />
+                          </div>
+
+                          <div>
+                            <p className="font-[Poppins] font-medium text-[12px] leading-[100%] tracking-[0%] uppercase text-[#7A7A7A]">
+                              Client
+                            </p>
+
+                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                              {project.clientName || "—"}
+                            </p>
+                          </div>
                         </div>
 
-                        <div>
-                          <p className="text-xs uppercase text-slate-400">
-                            Start date
-                          </p>
-                          <p className="mt-1 text-slate-900">
-                            {formatDate(project.startDate)}
-                          </p>
+                        {/* Start Date */}
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                            <FiCalendar className="text-[18px] text-[#0059FF]" />
+                          </div>
+
+                          <div>
+                            <p className="font-[Poppins] font-medium text-[12px] leading-[100%] tracking-[0%] uppercase text-[#7A7A7A]">
+                              Start Date
+                            </p>
+
+                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                              {formatDate(project.startDate)}
+                            </p>
+                          </div>
                         </div>
 
-                        <div>
-                          <p className="text-xs uppercase text-slate-400">
-                            End date
-                          </p>
-                          <p className="mt-1 text-slate-900">
-                            {formatDate(project.endDate)}
-                          </p>
+                        {/* End Date */}
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                            <FiCalendar className="text-[18px] text-[#0059FF]" />
+                          </div>
+
+                          <div>
+                            <p className="font-[Poppins] font-medium text-[12px] leading-[100%] tracking-[0%] uppercase text-[#7A7A7A]">
+                              End Date
+                            </p>
+
+                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                              {formatDate(project.endDate)}
+                            </p>
+                          </div>
                         </div>
 
-                        <div>
-                          <p className="text-xs uppercase text-slate-400">
-                            Developers
-                          </p>
-                          <p className="mt-1 text-slate-900">
-                            {project.developers?.join(", ") || "—"}
-                          </p>
+                        {/* Developers */}
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                            <FiUsers className="text-[18px] text-[#0059FF]" />
+                          </div>
+
+                          <div>
+                            <p className="font-[Poppins] font-medium text-[12px] leading-[100%] tracking-[0%] uppercase text-[#7A7A7A]">
+                              Developers
+                            </p>
+
+                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                              {project.developers?.join(", ") || "—"}
+                            </p>
+                          </div>
                         </div>
 
-                        <div>
-                          <p className="text-xs uppercase text-slate-400">
-                            Documents
-                          </p>
-                          <p className="mt-1 text-slate-900">
-                            {project.documents?.length ?? 0}
-                          </p>
+                        {/* Documents */}
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                            <FiFileText className="text-[18px] text-[#0059FF]" />
+                          </div>
+
+                          <div>
+                            <p className="font-[Poppins] font-medium text-[12px] leading-[100%] tracking-[0%] uppercase text-[#7A7A7A]">
+                              Documents
+                            </p>
+
+                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                              {project.documents?.length ?? 0}
+                            </p>
+                          </div>
                         </div>
 
-                        <div>
-                          <p className="text-xs uppercase text-slate-400">
-                            URLs
-                          </p>
-                          <div className="mt-1 space-y-1 text-slate-900">
-                            <p>{project.devUrl ?? "Dev: —"}</p>
-                            <p>{project.uatUrl ?? "UAT: —"}</p>
-                            <p>{project.prodUrl ?? "Prod: —"}</p>
+                        {/* URLs */}
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                            <FiLink className="text-[18px] text-[#0059FF]" />
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="font-[Poppins] font-medium text-[12px] leading-[100%] tracking-[0%] uppercase text-[#7A7A7A]">
+                              URL
+                            </p>
+
+                            <div className="mt-[2px] space-y-[2px]">
+                              <p className="font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616] break-all">
+                                {project.devUrl || "—"}
+                              </p>
+
+                              <p className="font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616] break-all">
+                                {project.uatUrl || "—"}
+                              </p>
+
+                              <p className="font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616] break-all">
+                                {project.prodUrl || "—"}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -236,6 +309,33 @@ function ViewDetails() {
           </section>
         </div>
       )}
+    </div>
+  );
+}
+
+/* Reusable Info Card */
+function InfoCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50">
+        {icon}
+      </div>
+
+      <div>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+          {label}
+        </p>
+
+        <p className="mt-1 text-sm font-medium text-slate-900">{value}</p>
+      </div>
     </div>
   );
 }

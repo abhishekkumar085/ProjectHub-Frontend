@@ -68,9 +68,7 @@ export default function ProjectFormInline({
 
     // backend relative path
     if (doc.url) {
-      const cleanPath = doc.url.startsWith("/")
-        ? doc.url
-        : `/${doc.url}`;
+      const cleanPath = doc.url.startsWith("/") ? doc.url : `/${doc.url}`;
 
       return `${docBaseUrl}${cleanPath}`;
     }
@@ -166,11 +164,13 @@ export default function ProjectFormInline({
 
   const [isAssignedOpen, setIsAssignedOpen] = useState(false);
   const [assignedTo, setAssignedTo] = useState<string[]>([]); // store selected user IDs
-  const [assignedOptions, setAssignedOptions] = useState<{
-    id: string;
-    name: string;
-    email?: string;
-  }[]>([]);
+  const [assignedOptions, setAssignedOptions] = useState<
+    {
+      id: string;
+      name: string;
+      email?: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     const fetchAssignableUsers = async () => {
@@ -178,7 +178,11 @@ export default function ProjectFormInline({
         const res = await api.get("/project/assignable-users");
         const users = res?.data?.data || [];
         setAssignedOptions(
-          users.map((u: any) => ({ id: u.id, name: u.name || u.email, email: u.email })),
+          users.map((u: any) => ({
+            id: u.id,
+            name: u.name || u.email,
+            email: u.email,
+          })),
         );
       } catch (err) {
         console.error("Failed to fetch assignable users", err);
@@ -245,9 +249,15 @@ export default function ProjectFormInline({
       setDevelopers(project.developers || []);
       setDocuments(project.documents || []);
       // prefer explicit assignedUsers array if provided by backend
-      if (Array.isArray((project as any).assignedUsers) && (project as any).assignedUsers.length > 0) {
+      if (
+        Array.isArray((project as any).assignedUsers) &&
+        (project as any).assignedUsers.length > 0
+      ) {
         setAssignedTo((project as any).assignedUsers);
-      } else if ((project as any).members && Array.isArray((project as any).members)) {
+      } else if (
+        (project as any).members &&
+        Array.isArray((project as any).members)
+      ) {
         // fallback for older shape where members list contains assignedTo objects
         const assignedUserIds = (project as any).members
           .map((member: any) => member.assignedTo?.id)
@@ -469,17 +479,24 @@ export default function ProjectFormInline({
 
                 {/* Dropdown Button */}
                 <div
-                  onClick={() => !isViewOnly && setIsAssignedOpen(!isAssignedOpen)}
+                  onClick={() =>
+                    !isViewOnly && setIsAssignedOpen(!isAssignedOpen)
+                  }
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 cursor-pointer bg-white"
                 >
-                  {assignedTo.length > 0 ? `${assignedTo.length} selected` : "Select Assigned To"}
+                  {assignedTo.length > 0
+                    ? `${assignedTo.length} selected`
+                    : "Select Assigned To"}
                 </div>
 
                 {/* Dropdown Options */}
                 {isAssignedOpen && (
                   <div className="absolute mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-10 p-3">
                     {assignedOptions.map((option) => (
-                      <label key={option.id} className="flex items-center gap-2 py-2">
+                      <label
+                        key={option.id}
+                        className="flex items-center gap-2 py-2"
+                      >
                         <input
                           type="checkbox"
                           checked={assignedTo.includes(option.id)}
@@ -708,85 +725,82 @@ export default function ProjectFormInline({
               Documents
             </label>
 
-            {!isViewOnly && (
-              <div
-                className="w-135.5 h-50.5 border-2 border-dashed border-blue-400 rounded-2xl bg-[#F3F6FB] p-8 text-center cursor-pointer hover:bg-[#EEF4FF] transition"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  handleFileUpload({
-                    target: { files: e.dataTransfer.files },
-                  } as any);
-                }}
-              >
-                <label className="cursor-pointer flex flex-col items-center">
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-blue-500 text-blue-600 mb-4">
-                    <FiUploadCloud size={28} />
-                  </div>
-                  <p className="font-[Poppins] font-medium text-[16px] leading-6 tracking-[0%] text-center align-middle text-slate-800">
-                    Drag & drop files or{" "}
-                    <span className="text-blue-600 underline">Browse</span>
-                  </p>
-
-                  <p className="font-[Poppins] font-normal text-[12px] leading-4.5 tracking-[0%] text-center align-middle text-[#444444] mt-2">
-                    Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI, Word,
-                    PPT
-                  </p>
-
-                  <input
-                    type="file"
-                    hidden
-                    multiple
-                    onChange={handleFileUpload}
-                  />
-                </label>
-              </div>
-            )}
-            {/* Uploaded Files List */}
-            <div className="mt-4 space-y-2">
-              {documents.map((doc) => (
+            {/* 2 Column Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Side - Drag & Drop Upload */}
+              {!isViewOnly && (
                 <div
-                  key={doc.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-2"
+                  className="w-full min-h-[202px] border-2 border-dashed border-blue-400 rounded-2xl bg-[#F3F6FB] p-8 text-center cursor-pointer hover:bg-[#EEF4FF] transition flex items-center justify-center"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    handleFileUpload({
+                      target: { files: e.dataTransfer.files },
+                    } as any);
+                  }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm">
-                      <FiFileText size={16} className="text-slate-500" />
+                  <label className="cursor-pointer flex flex-col items-center">
+                    <div className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-blue-500 text-blue-600 mb-4">
+                      <FiUploadCloud size={28} />
                     </div>
 
-                    <div>
-                      <p className="font-medium text-slate-800 truncate w-32 sm:w-60">
-                        {doc.originalName}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {doc.size
-                          ? `${(doc.size / 1024 / 1024).toFixed(2)} MB`
-                          : "File"}
-                      </p>
-                    </div>
-                  </div>
+                    <p className="font-[Poppins] font-medium text-[16px] leading-6 text-center text-slate-800">
+                      Drag & drop files or{" "}
+                      <span className="text-blue-600 underline">Browse</span>
+                    </p>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPreviewDocument(doc)}
-                      className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
-                    >
-                      <FiEye />
-                    </button>
+                    <p className="font-[Poppins] font-normal text-[12px] leading-[18px] text-center text-[#444444] mt-2">
+                      Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI,
+                      Word, PPT
+                    </p>
 
-                    {!isViewOnly && (
-                      <button
-                        type="button"
-                        onClick={() => removeDocument(doc.id)}
-                        className="text-red-500"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    )}
-                  </div>
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      onChange={handleFileUpload}
+                    />
+                  </label>
                 </div>
-              ))}
+              )}
+
+              {/* Right Side - Uploaded Files List */}
+              <div className="space-y-3">
+                {documents.length > 0 ? (
+                  documents.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between rounded-[10px] bg-[#f5f5f5] px-4 py-[14px]"
+                    >
+                      {/* File Name */}
+                      <div className="flex items-center overflow-hidden">
+                        <p className="truncate text-[15px] font-normal text-[#3f3f3f]">
+                          {doc.originalName}
+                        </p>
+                      </div>
+
+                      {/* Delete Icon */}
+                      {!isViewOnly && (
+                        <button
+                          type="button"
+                          onClick={() => removeDocument(doc.id)}
+                          className="flex h-7 w-7 items-center justify-center rounded-md bg-white"
+                        >
+                          <FiTrash2
+                            size={14}
+                            className="text-[#ff4d4f]"
+                            strokeWidth={2.2}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center min-h-[202px] rounded-2xl bg-[#f9f9f9] text-gray-400 text-sm">
+                    No files uploaded
+                  </div>
+                )}
+              </div>
             </div>
 
             {(errors.documents || documentError) && (
@@ -818,7 +832,8 @@ export default function ProjectFormInline({
                  shadow-[0px_2px_6px_rgba(0,0,0,0.15)] 
                  hover:opacity-90 transition"
               style={{
-                borderImage: "linear-gradient(90deg, #6B9FFF 0%, #0059FF 100%) 1",
+                borderImage:
+                  "linear-gradient(90deg, #6B9FFF 0%, #0059FF 100%) 1",
               }}
             >
               Save Details

@@ -73,7 +73,7 @@ function AddManager() {
   };
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+    <div className="w-full ">
       {/* Breadcrumb */}
       <nav className="flex flex-wrap items-center gap-1 text-sm font-[Poppins] mb-2">
         <Link to="/" className="text-[#0059FF] hover:underline">

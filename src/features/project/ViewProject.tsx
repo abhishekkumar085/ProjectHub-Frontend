@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import {
   Folder,
   FileText,
@@ -11,7 +11,7 @@ import {
   Eye,
   User,
 } from "lucide-react";
-import { FiChevronRight } from "react-icons/fi";
+import { FiArrowLeft, FiChevronRight } from "react-icons/fi";
 
 function ViewProject() {
   const { id } = useParams<{ id: string }>();
@@ -137,8 +137,20 @@ function ViewProject() {
         <span className="text-slate-500">Project Details</span>
       </nav>
       {/* Basic Information Card */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
+        <h1 className=" mt-5 font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-[0px] text-[#00076F]">
+          Project Details
+        </h1>{" "}
+        <button
+          onClick={() => navigate("/managers")}
+          className="inline-flex items-center gap-2 px-4 py-2 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
+        >
+          <FiArrowLeft />
+          <span>Back</span>
+        </button>
+      </div>
       <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
+        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-3 mt-3">
           Basic Information
         </h1>
 
