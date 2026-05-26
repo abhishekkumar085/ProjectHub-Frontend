@@ -13,6 +13,7 @@ export type ProjectPriority =
   | "CRITICAL";
 
 export interface ProjectDocument {
+  url: any;
   id: string;
   projectId: string;
   filename: string;
@@ -40,6 +41,7 @@ export interface Project {
   prodUrl: string | null;
   // ownerId: string;
   documents: ProjectDocument[];
+  assignedUsers?: string[];
   // createdAt: string;
   // updatedAt: string;
 }
@@ -56,6 +58,7 @@ export interface CreateProjectPayload {
   startDate?: string | null;
   endDate?: string | null;
   developers?: string[];
+  assignedUsers?: string[];
   devUrl?: string | null;
   uatUrl?: string | null;
   prodUrl?: string | null;

@@ -39,7 +39,7 @@ export const sidebarMenu: SidebarMenuItem[] = [
   },
 
   {
-    label: "Managers",
+    label: "Users",
     path: "/managers",
     icon: <FiUserCheck />,
     roles: [ROLES.ADMIN],
