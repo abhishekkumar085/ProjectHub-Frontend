@@ -8,7 +8,7 @@ interface HeaderProps {
   onToggle: () => void;
   onMobileOpen?: () => void;
 }
-
+import { FiUser, FiLock, FiLogOut } from "react-icons/fi";
 function Header({ collapsed, onToggle, onMobileOpen }: HeaderProps) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -79,17 +79,38 @@ function Header({ collapsed, onToggle, onMobileOpen }: HeaderProps) {
             <User size={20} className="text-gray-700 hidden sm:block" />
           </div>
 
-          <span className="hidden sm:inline text-sm font-medium text-gray-700">Admin</span>
+          <span className="hidden sm:inline text-sm font-medium text-gray-700">
+            Admin
+          </span>
 
           <ChevronDown size={16} className="text-gray-500" />
         </button>
 
         {open && (
-          <div className="absolute right-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-xl">
+          <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl">
+            <button
+              onClick={() => navigate("/profile")}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-gray-100"
+            >
+              <FiUser size={16} className="text-blue-600" />
+              Edit Profile
+            </button>
+
+            <button
+              onClick={() => navigate("/change-password")}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-gray-100"
+            >
+              <FiLock size={16} className="text-violet-600" />
+              Change Password
+            </button>
+
+            <div className="border-t border-gray-200" />
+
             <button
               onClick={handleLogout}
-              className="block w-full px-4 py-3 text-left text-sm hover:bg-gray-100"
+              className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-red-600 transition hover:bg-red-50"
             >
+              <FiLogOut size={16} className="text-red-600" />
               Logout
             </button>
           </div>
