@@ -38,8 +38,8 @@ function ProjectDocumentsModal({
     link.href =
       "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf";
 
-    link.download =
-      doc.originalName;
+    const name = doc.originalName || doc.name || doc.filename || doc.file?.name || (doc.url ? String(doc.url).split('/')?.pop() : 'document');
+    link.download = name;
 
     link.click();
   };
@@ -99,7 +99,7 @@ function ProjectDocumentsModal({
 
                     <div>
                       <p className="font-medium text-slate-800">
-                        {doc.originalName}
+                        {doc.originalName || doc.name || doc.filename || doc.file?.name || (doc.url ? String(doc.url).split('/')?.pop() : 'Untitled')}
                       </p>
 
                       <p className="text-xs text-slate-500">

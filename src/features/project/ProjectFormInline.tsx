@@ -13,6 +13,7 @@ import {
   FiX,
   FiEye,
 } from "react-icons/fi";
+import Breadcrumb from "../../components/common/Breadcrumb";
 import type {
   CreateProjectPayload,
   Project,
@@ -52,11 +53,20 @@ export default function ProjectFormInline({
 }: Props) {
   const isEditing = !!project || !!isEditMode;
   const isViewOnly = !!isViewMode;
+  const pageTitle = isViewOnly ? "View Project" : isEditing ? "Edit Project" : "Add Project";
   const [previewDocument, setPreviewDocument] =
     useState<ProjectDocument | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  })();
+  const userRole = String(currentUser?.role || "").toUpperCase();
 
   const getDocumentUrl = (doc: ProjectDocument) => {
     const docBaseUrl = import.meta.env.VITE_DOC_VIEW_URL?.replace(/\/$/, "");
@@ -68,9 +78,7 @@ export default function ProjectFormInline({
 
     // backend relative path
     if (doc.url) {
-      const cleanPath = doc.url.startsWith("/")
-        ? doc.url
-        : `/${doc.url}`;
+      const cleanPath = doc.url.startsWith("/") ? doc.url : `/${doc.url}`;
 
       return `${docBaseUrl}${cleanPath}`;
     }
@@ -166,11 +174,13 @@ export default function ProjectFormInline({
 
   const [isAssignedOpen, setIsAssignedOpen] = useState(false);
   const [assignedTo, setAssignedTo] = useState<string[]>([]); // store selected user IDs
-  const [assignedOptions, setAssignedOptions] = useState<{
-    id: string;
-    name: string;
-    email?: string;
-  }[]>([]);
+  const [assignedOptions, setAssignedOptions] = useState<
+    {
+      id: string;
+      name: string;
+      email?: string;
+    }[]
+  >([]);
 
   useEffect(() => {
     const fetchAssignableUsers = async () => {
@@ -178,7 +188,11 @@ export default function ProjectFormInline({
         const res = await api.get("/project/assignable-users");
         const users = res?.data?.data || [];
         setAssignedOptions(
-          users.map((u: any) => ({ id: u.id, name: u.name || u.email, email: u.email })),
+          users.map((u: any) => ({
+            id: u.id,
+            name: u.name || u.email,
+            email: u.email,
+          })),
         );
       } catch (err) {
         console.error("Failed to fetch assignable users", err);
@@ -199,7 +213,6 @@ export default function ProjectFormInline({
     register,
     handleSubmit,
     reset,
-    getValues,
     setError,
     clearErrors,
     formState: { errors },
@@ -229,6 +242,23 @@ export default function ProjectFormInline({
   };
 
   useEffect(() => {
+    const normalizeDoc = (d: any) => {
+      const urlStr = d?.url || d?.path || d?.fileUrl || d?.link || "";
+      const inferredFilename = d?.filename || d?.fileName || d?.name || (typeof urlStr === "string" ? urlStr.split("/").pop() : "") || "";
+
+      return {
+        id: d?.id || d?._id || d?.documentId || crypto.randomUUID(),
+        projectId: d?.projectId || d?.project_id || "",
+        filename: inferredFilename,
+        originalName: d?.originalName || d?.name || d?.fileName || d?.filename || d?.originalname || d?.label || inferredFilename,
+        mimeType: d?.mimeType || d?.mime_type || d?.type || "",
+        size: d?.size || d?.length || d?.file?.size || 0,
+        uploadedAt: d?.uploadedAt || d?.createdAt || d?.created_at || "",
+        url: d?.url || d?.path || d?.fileUrl || d?.link || "",
+        file: d?.file,
+      } as ProjectDocument;
+    };
+
     if (project) {
       reset({
         name: project.name,
@@ -244,13 +274,24 @@ export default function ProjectFormInline({
       });
 
       setDevelopers(project.developers || []);
-      setDocuments(project.documents || []);
-      if ((project as any).members && Array.isArray((project as any).members)) {
-        const assignedUserIds = (project as any).members.map(
-          (member: any) => member.assignedTo?.id
-        );
+      const rawDocs = project.documents ?? [];
+      setDocuments((Array.isArray(rawDocs) ? rawDocs.map(normalizeDoc) : []));
+      // prefer explicit assignedUsers array if provided by backend
+      if (
+        Array.isArray((project as any).assignedUsers) &&
+        (project as any).assignedUsers.length > 0
+      ) {
+        setAssignedTo((project as any).assignedUsers);
+      } else if (
+        (project as any).members &&
+        Array.isArray((project as any).members)
+      ) {
+        // fallback for older shape where members list contains assignedTo objects
+        const assignedUserIds = (project as any).members
+          .map((member: any) => member.assignedTo?.id)
+          .filter(Boolean);
 
-        setAssignedTo(assignedUserIds);
+        setAssignedTo(assignedUserIds as string[]);
       }
     } else {
       reset();
@@ -369,24 +410,18 @@ export default function ProjectFormInline({
       const payload: CreateProjectPayload = { ...data, developers };
 
       if (!isEditing) {
-        const createdProject = await createProject(
-    payload,
-    documents
-        .map((doc) => doc.file)
-        .filter((f): f is File => !!f)
-);
-
-await assignProjectUsers(
-    createdProject.id,
-    assignedTo
-);
-
-showSuccessToast("Project created and assigned successfully.");
+        await createProject(
+          payload,
+          documents.map((doc) => doc.file).filter((f): f is File => !!f),
+          assignedTo.length ? assignedTo : undefined,
+        );
+        showSuccessToast("Project created successfully.");
       } else if (project) {
         await updateProject(
           project.id,
           payload,
           documents.map((doc) => doc.file).filter((f): f is File => !!f),
+          assignedTo.length ? assignedTo : undefined,
         );
         showSuccessToast("Project updated successfully.");
       }
@@ -408,24 +443,18 @@ showSuccessToast("Project created and assigned successfully.");
 
   return (
     <div className="">
-      <div
-        className=" 
-   "
-      >
+      <div className=" ">
+        <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/projects", label: "Projects" }, { label: pageTitle }]} />
+
         <h2 className="text-[20px] font-semibold leading-[100%] tracking-[0%] text-[#00076F] font-[Poppins] mb-4">
-         
-          {isViewOnly
-            ? "View Project"
-            : isEditing
-              ? "Edit Project"
-              : "Add Project"}
+          {pageTitle}
         </h2>
          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Project Name
-                <span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0px]">
+                <span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
                   *
                 </span>
               </label>
@@ -461,7 +490,7 @@ showSuccessToast("Project created and assigned successfully.");
                   {errors.description.message}
                 </p>
               )}
-              <div className="relative">
+              {userRole == "ADMIN" && (<div className="relative">
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Assigned To
                 </label>
@@ -497,17 +526,24 @@ showSuccessToast("Project created and assigned successfully.");
 
                 {/* Dropdown Button */}
                 <div
-                  onClick={() => !isViewOnly && setIsAssignedOpen(!isAssignedOpen)}
+                  onClick={() =>
+                    !isViewOnly && setIsAssignedOpen(!isAssignedOpen)
+                  }
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 cursor-pointer bg-white"
                 >
-                  {assignedTo.length > 0 ? `${assignedTo.length} selected` : "Select Assigned To"}
+                  {assignedTo.length > 0
+                    ? `${assignedTo.length} selected`
+                    : "Select Assigned To"}
                 </div>
 
                 {/* Dropdown Options */}
                 {isAssignedOpen && (
                   <div className="absolute mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-10 p-3">
                     {assignedOptions.map((option) => (
-                      <label key={option.id} className="flex items-center gap-2 py-2">
+                      <label
+                        key={option.id}
+                        className="flex items-center gap-2 py-2"
+                      >
                         <input
                           type="checkbox"
                           checked={assignedTo.includes(option.id)}
@@ -519,7 +555,8 @@ showSuccessToast("Project created and assigned successfully.");
                     ))}
                   </div>
                 )}
-              </div>
+              </div>)}
+
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -634,9 +671,6 @@ showSuccessToast("Project created and assigned successfully.");
                   color: "bg-green-100 text-green-700",
                 },
               ].map((env) => {
-                const envValue = getValues(
-                  env.name as keyof CreateProjectPayload,
-                ) as string;
                 return (
                   <div className=" px-2 py-0 bg-white border border-[#E5E5E5] rounded-lg">
                     <div
@@ -644,7 +678,7 @@ showSuccessToast("Project created and assigned successfully.");
                       className="grid gap-3 sm:grid-cols-[80px_1fr_auto] justify-center items-center"
                     >
                       <div
-                        className={`flex w-[55px] h-[30px] items-center justify-center rounded-[26px] px-4 py-[6px] text-xs font-bold ${env.color}`}
+                        className={`flex w-13.75 h-7.5 items-center justify-center rounded-[26px] px-4 py-1.5 text-xs font-bold ${env.color}`}
                       >
                         {env.label}
                       </div>
@@ -656,7 +690,7 @@ showSuccessToast("Project created and assigned successfully.");
                             validateUrl(value) || "Invalid URL",
                         })}
                         disabled={isViewOnly}
-                        className="w-full rounded-xl px-4 py-3 outline-none focus:outline-none font-[Poppins] placeholder:text-[#7A7A7A] placeholder:font-medium placeholder:text-[14px] placeholder:leading-[100%] placeholder:tracking-[0px]"
+                        className="w-full rounded-xl px-4 py-3 outline-none focus:outline-none font-[Poppins] placeholder:text-[#7A7A7A] placeholder:font-medium placeholder:text-[14px] placeholder:leading-[100%] placeholder:tracking-normal"
                         placeholder={
                           env.label === "DEV"
                             ? "Enter Dev URL"
@@ -700,7 +734,7 @@ showSuccessToast("Project created and assigned successfully.");
                   onClick={addDeveloper}
                   className="rounded-xl border border-[#0059FF] bg-white px-4 py-2 
              font-[Poppins] font-medium text-[14px] 
-             leading-[100%] tracking-[0px] text-center align-middle 
+             leading-[100%] tracking-normal text-center align-middle 
              text-[#0059FF] hover:bg-blue-50 transition"
                 >
                   Add
@@ -740,85 +774,107 @@ showSuccessToast("Project created and assigned successfully.");
               Documents
             </label>
 
-            {!isViewOnly && (
-              <div
-                className="w-[542px] h-[202px] border-2 border-dashed border-blue-400 rounded-2xl bg-[#F3F6FB] p-8 text-center cursor-pointer hover:bg-[#EEF4FF] transition"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  handleFileUpload({
-                    target: { files: e.dataTransfer.files },
-                  } as any);
-                }}
-              >
-                <label className="cursor-pointer flex flex-col items-center">
-                  <div className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-blue-500 text-blue-600 mb-4">
-                    <FiUploadCloud size={28} />
-                  </div>
-                  <p className="font-[Poppins] font-medium text-[16px] leading-[24px] tracking-[0%] text-center align-middle text-slate-800">
-                    Drag & drop files or{" "}
-                    <span className="text-blue-600 underline">Browse</span>
-                  </p>
-
-                  <p className="font-[Poppins] font-normal text-[12px] leading-[18px] tracking-[0%] text-center align-middle text-[#444444] mt-2">
-                    Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI, Word,
-                    PPT
-                  </p>
-
-                  <input
-                    type="file"
-                    hidden
-                    multiple
-                    onChange={handleFileUpload}
-                  />
-                </label>
-              </div>
-            )}
-            {/* Uploaded Files List */}
-            <div className="mt-4 space-y-2">
-              {documents.map((doc) => (
+            {/* 2 Column Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Side - Drag & Drop Upload */}
+              {!isViewOnly && (
                 <div
-                  key={doc.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-2"
+                  className="w-full min-h-[202px] border-2 border-dashed border-blue-400 rounded-2xl bg-[#F3F6FB] p-8 text-center cursor-pointer hover:bg-[#EEF4FF] transition flex items-center justify-center"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    handleFileUpload({
+                      target: { files: e.dataTransfer.files },
+                    } as any);
+                  }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm">
-                      <FiFileText size={16} className="text-slate-500" />
+                  <label className="cursor-pointer flex flex-col items-center">
+                    <div className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-blue-500 text-blue-600 mb-4">
+                      <FiUploadCloud size={28} />
                     </div>
 
-                    <div>
-                      <p className="font-medium text-slate-800 truncate w-32 sm:w-60">
-                        {doc.originalName}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {doc.size
-                          ? `${(doc.size / 1024 / 1024).toFixed(2)} MB`
-                          : "File"}
-                      </p>
-                    </div>
-                  </div>
+                    <p className="font-[Poppins] font-medium text-[16px] leading-6 text-center text-slate-800">
+                      Drag & drop files or{" "}
+                      <span className="text-blue-600 underline">Browse</span>
+                    </p>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPreviewDocument(doc)}
-                      className="rounded-lg p-2 text-blue-600 hover:bg-blue-50"
-                    >
-                      <FiEye />
-                    </button>
+                    <p className="font-[Poppins] font-normal text-[12px] leading-[18px] text-center text-[#444444] mt-2">
+                      Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI,
+                      Word, PPT
+                    </p>
 
-                    {!isViewOnly && (
-                      <button
-                        type="button"
-                        onClick={() => removeDocument(doc.id)}
-                        className="text-red-500"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    )}
-                  </div>
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      onChange={handleFileUpload}
+                    />
+                  </label>
                 </div>
-              ))}
+              )}
+
+              {/* Right Side - Uploaded Files List */}
+              <div className="space-y-3">
+                {documents.length > 0 ? (
+                  documents.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between rounded-[10px] bg-[#f5f5f5] px-4 py-[14px]"
+                    >
+                      {/* File Name */}
+                      <div className="flex flex-col overflow-hidden">
+                        <p
+                          className="text-[15px] font-normal text-[#3f3f3f] truncate"
+                          title={doc.originalName || doc.filename}
+                        >
+                          {doc.originalName || doc.filename}
+                        </p>
+                        {doc.filename && doc.originalName !== doc.filename && (
+                          <p
+                            className="text-xs text-slate-500 truncate"
+                            title={doc.filename}
+                          >
+                            {doc.filename}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* View (eye) and Delete Icons */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewDocument(doc as any);
+                          }}
+                          title="View document"
+                          className="flex h-7 w-7 items-center justify-center rounded-md bg-white"
+                        >
+                          <FiEye size={14} className="text-[#0059FF]" />
+                        </button>
+
+                        {!isViewOnly && (
+                          <button
+                            type="button"
+                            onClick={() => removeDocument(doc.id)}
+                            className="flex h-7 w-7 items-center justify-center rounded-md bg-white"
+                          >
+                            <FiTrash2
+                              size={14}
+                              className="text-[#ff4d4f]"
+                              strokeWidth={2.2}
+                            />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center min-h-[202px] rounded-2xl bg-[#f9f9f9] text-gray-400 text-sm">
+                    No files uploaded
+                  </div>
+                )}
+              </div>
             </div>
 
             {(errors.documents || documentError) && (
@@ -831,9 +887,9 @@ showSuccessToast("Project created and assigned successfully.");
             {/* Cancel Button */}
             <button
               type="button"
-              className="w-[99px] h-[45px] px-[24px] py-[12px] rounded-[8px] border border-[#7A7A7A] 
+              className="w-24.75 h-11.25 px-6 py-3 rounded-lg border border-[#7A7A7A] 
                  bg-white font-[Poppins] font-medium text-[14px] 
-                 leading-[100%] tracking-[0px] text-center align-middle 
+                 leading-[100%] tracking-normal text-center align-middle 
                  text-[#7A7A7A] hover:bg-gray-50 transition"
             >
               Cancel
@@ -842,15 +898,16 @@ showSuccessToast("Project created and assigned successfully.");
             {/* Save Details Button */}
             <button
               type="submit"
-              className=" h-[45px] px-[24px] py-[12px] rounded-[8px] 
+              className=" h-11.25 px-6 py-3 rounded-lg 
                  bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] 
                  font-[Poppins] font-medium text-[14px] 
-                 leading-[100%] tracking-[0px] text-center align-middle 
+                 leading-[100%] tracking-normal text-center align-middle 
                  text-white 
                  shadow-[0px_2px_6px_rgba(0,0,0,0.15)] 
                  hover:opacity-90 transition"
               style={{
-                borderImage: "linear-gradient(90deg, #6B9FFF 0%, #0059FF 100%) 1",
+                borderImage:
+                  "linear-gradient(90deg, #6B9FFF 0%, #0059FF 100%) 1",
               }}
             >
               Save Details
@@ -868,7 +925,7 @@ showSuccessToast("Project created and assigned successfully.");
                   Document Preview
                 </h2>
                 <p className="mt-1 text-sm text-slate-500 truncate">
-                  {previewDocument.originalName}
+                  {previewDocument?.originalName || (previewDocument as any)?.name || previewDocument?.filename || previewDocument?.file?.name || (previewDocument?.url ? String(previewDocument.url).split("/").pop() : "Untitled")}
                 </p>
               </div>
               <button
@@ -885,7 +942,7 @@ showSuccessToast("Project created and assigned successfully.");
                 </div>
               ) : previewUrl ? (
                 <iframe
-                  title={previewDocument?.originalName || "document-preview"}
+                  title={previewDocument?.originalName || (previewDocument as any)?.name || previewDocument?.filename || previewDocument?.file?.name || "document-preview"}
                   src={previewUrl}
                   className="h-full w-full rounded-b-2xl"
                 />

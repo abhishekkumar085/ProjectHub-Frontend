@@ -218,7 +218,8 @@ const onSubmit = async (
                 payload,
                 documents
                     .map((doc) => doc.file)
-                    .filter((f): f is File => !!f)
+                    .filter((f): f is File => !!f),
+                undefined,
             );
         }
 
@@ -229,7 +230,8 @@ const onSubmit = async (
                 payload,
                 documents
                     .map((doc) => doc.file)
-                    .filter((f): f is File => !!f)
+                    .filter((f): f is File => !!f),
+                undefined,
             );
         }
 

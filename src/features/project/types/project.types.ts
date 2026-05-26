@@ -12,15 +12,27 @@ export type ProjectPriority =
   | "HIGH"
   | "CRITICAL";
 
+export interface ProjectMember {
+  assignedTo?: {
+    id?: string;
+    name?: string;
+    email?: string;
+  };
+}
+
 export interface ProjectDocument {
   url: any;
   id: string;
-  projectId: string;
-  filename: string;
-  originalName: string;
-  mimeType: string;
-  size: number;
-  uploadedAt: string;
+  projectId?: string;
+  filename?: string;
+  originalName?: string;
+  name?: string;
+  mimeType?: string;
+  fileType?: string;
+  fileSize?: string;
+  size?: number;
+  uploadedAt?: string;
+  createdAt?: string;
   file?: File;
 }
 
@@ -42,6 +54,7 @@ export interface Project {
   // ownerId: string;
   documents: ProjectDocument[];
   assignedUsers?: string[];
+  members?: ProjectMember[];
   // createdAt: string;
   // updatedAt: string;
 }
@@ -54,7 +67,7 @@ export interface CreateProjectPayload {
   status?: ProjectStatus;
   priority?: ProjectPriority;
   clientName?: string | null;
-  
+
   startDate?: string | null;
   endDate?: string | null;
   developers?: string[];
