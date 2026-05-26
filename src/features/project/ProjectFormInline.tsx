@@ -300,13 +300,14 @@ showSuccessToast("Project created and assigned successfully.");
    "
       >
         <h2 className="text-[20px] font-semibold leading-[100%] tracking-[0%] text-[#00076F] font-[Poppins] mb-4">
+         
           {isViewOnly
             ? "View Project"
             : isEditing
               ? "Edit Project"
               : "Add Project"}
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -510,6 +511,7 @@ showSuccessToast("Project created and assigned successfully.");
               </div>
             </div>
           </div>
+          </form>
           {/* card two */}
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <label className="block font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-2">
@@ -719,7 +721,7 @@ showSuccessToast("Project created and assigned successfully.");
               </p>
             )}
           </div>
-        </form>
+        
       </div>
 
       {previewDocument && (
@@ -756,7 +758,10 @@ showSuccessToast("Project created and assigned successfully.");
             </div>
           </div>
         </div>
+        
       )}
+      
+     
       <div className="flex items-center justify-end gap-6 mt-4">
         {/* Cancel Button */}
         <button
@@ -786,6 +791,7 @@ showSuccessToast("Project created and assigned successfully.");
           Save Details
         </button>
       </div>
+      
     </div>
   );
 }
