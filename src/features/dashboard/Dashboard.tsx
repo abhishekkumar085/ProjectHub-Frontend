@@ -6,15 +6,9 @@ import activeIcon from "../../assets/Active.png";
 import completedIcon from "../../assets/Completed.png";
 import { useEffect, useState } from "react";
 import { getDashboardApi } from "./dashboardapi";
-import {
-  LineChart,
-  Line,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-} from "recharts";
+import Highcharts from "highcharts";
+
+import { HighchartsReact } from "highcharts-react-official";
 
 interface KpiTile {
   label: string;
@@ -85,10 +79,126 @@ function Dashboard() {
 
   const graphData = dashboard?.graphData ?? [];
 
-  const maxVal = Math.max(
-    ...graphData.map((d) => Math.max(d.active, d.completed)),
-    4
-  );
+  const chartOptions = {
+    chart: {
+      type: "spline",
+      backgroundColor: "transparent",
+      height: 300,
+      spacing: [4, 0, 4, 0],
+    },
+    title: {
+      text: "",
+    },
+    xAxis: {
+      categories: graphData.map((item) => item.month),
+      lineColor: "#D9D9D9",
+      tickLength: 0,
+      gridLineWidth: 1,
+      gridLineDashStyle: "Dot",
+      gridLineColor: "#E3E3E3",
+      labels: {
+        y: 18,
+        style: {
+          color: "#7A7A7A",
+          fontSize: "12px",
+          fontFamily: "Poppins",
+        },
+      },
+    },
+    yAxis: {
+      min: 0,
+      max: 10,
+      tickInterval: 2,
+      lineWidth: 1,
+      lineColor: "#D9D9D9",
+      gridLineWidth: 1,
+      gridLineDashStyle: "Dot",
+      gridLineColor: "#DCDCDC",
+      title: {
+        text: "Projects",
+        margin: 8,
+        style: {
+          color: "#1E1E1E",
+          fontSize: "12px",
+          fontFamily: "Poppins",
+        },
+      },
+      labels: {
+        x: -4,
+        style: {
+          color: "#7A7A7A",
+          fontSize: "12px",
+          fontFamily: "Poppins",
+        },
+      },
+    },
+    tooltip: {
+      shared: true,
+      backgroundColor: "#FFFFFF",
+      borderColor: "#E5E7EB",
+      borderRadius: 8,
+      style: {
+        color: "#1E1E1E",
+        fontSize: "12px",
+        fontFamily: "Poppins",
+      },
+    },
+    legend: {
+      align: "center",
+      verticalAlign: "bottom",
+      layout: "horizontal",
+      symbolHeight: 6,
+      symbolWidth: 14,
+      symbolRadius: 6,
+      itemDistance: 22,
+      margin: 4,
+      itemStyle: {
+        color: "#5E5E5E",
+        fontSize: "12px",
+        fontWeight: "400",
+        fontFamily: "Poppins",
+      },
+    },
+    credits: {
+      enabled: false,
+    },
+    plotOptions: {
+      spline: {
+        lineWidth: 1,
+        marker: {
+          enabled: true,
+          radius: 3,
+          lineWidth: 1,
+          fillColor: "#FFFFFF",
+        },
+        states: {
+          hover: {
+            lineWidthPlus: 0,
+          },
+        },
+      },
+    },
+    series: [
+      {
+        name: "Active",
+        type: "spline",
+        data: graphData.map((item) => item.active),
+        color: "#208A17",
+        marker: {
+          lineColor: "#208A17",
+        },
+      },
+      {
+        name: "Completed",
+        type: "spline",
+        data: graphData.map((item) => item.completed),
+        color: "#FF2C2C",
+        marker: {
+          lineColor: "#FF2C2C",
+        },
+      },
+    ],
+  };
 
   return (
     <div className="p-4 sm:p-6">
@@ -134,133 +244,19 @@ function Dashboard() {
       </div>
 
       {/* GRAPH SECTION */}
-     <div className="mt-5 rounded-[16px] bg-white border border-[#ECECEC] px-5 py-4 shadow-sm">
+      <div className="mt-5 rounded-none bg-white border border-[#ECECEC] px-4 py-4">
+        <h3 className="text-[18px] font-semibold text-[#1E1E1E] font-[Poppins] mb-3">
+          Projects Insights
+        </h3>
 
-  {/* TITLE */}
-
-  <h3 className="text-[18px] font-semibold text-[#1E1E1E] font-[Poppins] mb-4">
-    Projects Insights
-  </h3>
-
-  {/* CHART */}
-
-  <div className="w-full overflow-x-auto">
-
-    <LineChart
-      width={980}
-      height={250}
-      data={graphData}
-      margin={{
-        top: 5,
-        right: 10,
-        left: -20,
-        bottom: 10,
-      }}
-    >
-
-      {/* GRID */}
-
-      <CartesianGrid
-        strokeDasharray="3 3"
-        stroke="#E5E7EB"
-        vertical={true}
-      />
-
-      {/* X AXIS */}
-
-      <XAxis
-        dataKey="month"
-        tick={{
-          fill: "#9CA3AF",
-          fontSize: 11,
-          fontFamily: "Poppins",
-        }}
-        axisLine={false}
-        tickLine={false}
-      />
-
-      {/* Y AXIS */}
-
-      <YAxis
-        domain={[0, maxVal + 1]}
-        allowDecimals={false}
-        tick={{
-          fill: "#9CA3AF",
-          fontSize: 11,
-          fontFamily: "Poppins",
-        }}
-        axisLine={false}
-        tickLine={false}
-      />
-
-      {/* TOOLTIP */}
-
-      <Tooltip
-        contentStyle={{
-          borderRadius: "8px",
-          border: "1px solid #E5E7EB",
-          fontSize: "12px",
-          fontFamily: "Poppins",
-        }}
-      />
-
-      {/* LEGEND */}
-
-      <Legend
-        verticalAlign="bottom"
-        align="center"
-        iconType="circle"
-        wrapperStyle={{
-          paddingTop: "8px",
-          fontSize: "12px",
-          fontFamily: "Poppins",
-        }}
-      />
-
-      {/* ACTIVE */}
-
-      <Line
-        type="monotone"
-        dataKey="active"
-        stroke="#22C55E"
-        strokeWidth={1.8}
-        dot={{
-          r: 3,
-          fill: "#fff",
-          stroke: "#22C55E",
-          strokeWidth: 1.5,
-        }}
-        activeDot={{
-          r: 5,
-        }}
-        name="Active"
-      />
-
-      {/* COMPLETED */}
-
-      <Line
-        type="monotone"
-        dataKey="completed"
-        stroke="#FF4D4F"
-        strokeWidth={1.8}
-        dot={{
-          r: 3,
-          fill: "#fff",
-          stroke: "#FF4D4F",
-          strokeWidth: 1.5,
-        }}
-        activeDot={{
-          r: 5,
-        }}
-        name="Completed"
-      />
-
-    </LineChart>
-
-  </div>
+        <HighchartsReact
+          highcharts={Highcharts}
+          options={chartOptions}
+        />
+      </div>
 
 </div>
-        </div>
+       
 
       
 

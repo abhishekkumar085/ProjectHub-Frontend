@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { createProject, updateProject, assignProjectUsers, getAssignableUsers } from "./api/projectApi";
+ 
+import { createProject, updateProject } from "./api/projectApi";
 import api from "../../api/axios";
 import { showSuccessToast, showErrorToast } from "../../utils/toast";
-
+ 
 import {
   FiUploadCloud,
   FiTrash2,
@@ -21,14 +21,14 @@ import type {
   ProjectPriority,
   ProjectStatus,
 } from "./types/project.types";
-
+ 
 interface Props {
   project?: Project | null;
   isEditMode?: boolean;
   isViewMode?: boolean;
   onSaved?: () => void;
 }
-
+ 
 const statuses: { value: ProjectStatus; label: string }[] = [
   { value: "PLANNING", label: "Planning" },
   { value: "IN_PROGRESS", label: "In Progress" },
@@ -37,14 +37,14 @@ const statuses: { value: ProjectStatus; label: string }[] = [
   { value: "ON_HOLD", label: "On Hold" },
   { value: "CANCELLED", label: "Cancelled" },
 ];
-
+ 
 const priorities: { value: ProjectPriority; label: string }[] = [
   { value: "LOW", label: "Low" },
   { value: "MEDIUM", label: "Medium" },
   { value: "HIGH", label: "High" },
   { value: "CRITICAL", label: "Critical" },
 ];
-
+ 
 export default function ProjectFormInline({
   project,
   isEditMode,
@@ -67,35 +67,35 @@ export default function ProjectFormInline({
     }
   })();
   const userRole = String(currentUser?.role || "").toUpperCase();
-
+ 
   const getDocumentUrl = (doc: ProjectDocument) => {
     const docBaseUrl = import.meta.env.VITE_DOC_VIEW_URL?.replace(/\/$/, "");
-
+ 
     // already full url
     if (doc.url?.startsWith("http")) {
       return doc.url;
     }
-
+ 
     // backend relative path
     if (doc.url) {
       const cleanPath = doc.url.startsWith("/") ? doc.url : `/${doc.url}`;
-
+ 
       return `${docBaseUrl}${cleanPath}`;
     }
-
+ 
     // fallback filename
     if (doc.filename) {
       return `${docBaseUrl}/uploads/${encodeURIComponent(doc.filename)}`;
     }
-
+ 
     return "";
   };
-
+ 
   const canPreviewInIframe = (doc: ProjectDocument) => {
     const url = getDocumentUrl(doc);
     if (!url) return false;
     if (doc.file) return true;
-
+ 
     try {
       const parsed = new URL(url);
       return parsed.origin === window.location.origin;
@@ -103,7 +103,7 @@ export default function ProjectFormInline({
       return false;
     }
   };
-
+ 
   useEffect(() => {
     let objectUrl: string | null = null;
     const loadPreview = async () => {
@@ -113,7 +113,7 @@ export default function ProjectFormInline({
         setPreviewLoading(false);
         return;
       }
-
+ 
       setPreviewError("");
       const directUrl = getDocumentUrl(previewDocument);
       if (previewDocument.file) {
@@ -122,25 +122,25 @@ export default function ProjectFormInline({
         setPreviewLoading(false);
         return;
       }
-
+ 
       if (!directUrl) {
         setPreviewUrl("");
         setPreviewError("Preview URL unavailable.");
         return;
       }
-
+ 
       if (canPreviewInIframe(previewDocument)) {
         setPreviewUrl(directUrl);
         return;
       }
-
+ 
       setPreviewLoading(true);
       try {
         const response = await fetch(directUrl);
         if (!response.ok) {
           throw new Error(`Preview fetch failed: ${response.status}`);
         }
-
+ 
         const blob = await response.blob();
         objectUrl = URL.createObjectURL(blob);
         setPreviewUrl(objectUrl);
@@ -154,16 +154,16 @@ export default function ProjectFormInline({
         setPreviewLoading(false);
       }
     };
-
+ 
     loadPreview();
-
+ 
     return () => {
       if (objectUrl) {
         URL.revokeObjectURL(objectUrl);
       }
     };
   }, [previewDocument]);
-
+ 
   const [saving, setSaving] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
   const [developerInput, setDeveloperInput] = useState("");
@@ -171,7 +171,7 @@ export default function ProjectFormInline({
   const [documents, setDocuments] = useState<ProjectDocument[]>([]);
   const [developerError, setDeveloperError] = useState("");
   const [documentError, setDocumentError] = useState("");
-
+ 
   const [isAssignedOpen, setIsAssignedOpen] = useState(false);
   const [assignedTo, setAssignedTo] = useState<string[]>([]); // store selected user IDs
   const [assignedOptions, setAssignedOptions] = useState<
@@ -181,7 +181,7 @@ export default function ProjectFormInline({
       email?: string;
     }[]
   >([]);
-
+ 
   useEffect(() => {
     const fetchAssignableUsers = async () => {
       try {
@@ -198,10 +198,10 @@ export default function ProjectFormInline({
         console.error("Failed to fetch assignable users", err);
       }
     };
-
+ 
     fetchAssignableUsers();
   }, []);
-
+ 
   const handleAssignedChange = (value: string) => {
     setAssignedTo((prev) =>
       prev.includes(value)
@@ -230,22 +230,22 @@ export default function ProjectFormInline({
       prodUrl: "",
     },
   });
-
+ 
   const copyToClipboard = async (value: string) => {
     if (!value) return;
-
+ 
     try {
       await navigator.clipboard.writeText(value);
     } catch (error) {
       console.error("Clipboard copy failed", error);
     }
   };
-
+ 
   useEffect(() => {
     const normalizeDoc = (d: any) => {
       const urlStr = d?.url || d?.path || d?.fileUrl || d?.link || "";
       const inferredFilename = d?.filename || d?.fileName || d?.name || (typeof urlStr === "string" ? urlStr.split("/").pop() : "") || "";
-
+ 
       return {
         id: d?.id || d?._id || d?.documentId || crypto.randomUUID(),
         projectId: d?.projectId || d?.project_id || "",
@@ -258,7 +258,7 @@ export default function ProjectFormInline({
         file: d?.file,
       } as ProjectDocument;
     };
-
+ 
     if (project) {
       reset({
         name: project.name,
@@ -272,7 +272,7 @@ export default function ProjectFormInline({
         uatUrl: project.uatUrl || "",
         prodUrl: project.prodUrl || "",
       });
-
+ 
       setDevelopers(project.developers || []);
       const rawDocs = project.documents ?? [];
       setDocuments((Array.isArray(rawDocs) ? rawDocs.map(normalizeDoc) : []));
@@ -290,7 +290,7 @@ export default function ProjectFormInline({
         const assignedUserIds = (project as any).members
           .map((member: any) => member.assignedTo?.id)
           .filter(Boolean);
-
+ 
         setAssignedTo(assignedUserIds as string[]);
       }
     } else {
@@ -300,43 +300,19 @@ export default function ProjectFormInline({
       setAssignedTo([]);
     }
   }, [project, reset]);
-
-  useEffect(() => {
-
-  const fetchAssignableUsers = async () => {
-
-    try {
-
-      const users = await getAssignableUsers();
-
-      setAssignedOptions(users || []);
-
-    } catch (error) {
-
-      console.error(
-        "Failed to fetch assignable users",
-        error
-      );
-
-    }
-  };
-
-  fetchAssignableUsers();
-
-}, []);
-
+ 
   const validateUrl = (value: any) => {
     if (!value || typeof value !== "string") return true;
-
+ 
     try {
       const url = new URL(value);
-
+ 
       return url.protocol === "http:" || url.protocol === "https:";
     } catch {
       return false;
     }
   };
-
+ 
   const addDeveloper = () => {
     const value = developerInput.trim();
     if (!value) return;
@@ -349,32 +325,32 @@ export default function ProjectFormInline({
     setDeveloperError("");
     clearErrors("developers");
   };
-
+ 
   const removeDeveloper = (name: string) => {
     setDevelopers(developers.filter((d) => d !== name));
   };
-
+ 
   const handleDeveloperKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addDeveloper();
     }
   };
-
+ 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
+ 
     try {
       setUploadingFile(true);
-
+ 
       const selectedDocs = Array.from(files).map((file) => ({
         id: crypto.randomUUID(),
         originalName: file.name,
         size: file.size,
         file,
       }));
-
+ 
       setDocuments((prev: any) => [...selectedDocs, ...prev]);
       setDocumentError("");
       clearErrors("documents");
@@ -384,31 +360,31 @@ export default function ProjectFormInline({
       setUploadingFile(false);
     }
   };
-
+ 
   const onSubmit = async (data: CreateProjectPayload) => {
     clearErrors();
     setDeveloperError("");
     setDocumentError("");
-
+ 
     if (developers.length === 0) {
       const message = "At least one developer is required";
       setError("developers", { type: "required", message });
       setDeveloperError(message);
       return;
     }
-
+ 
     if (documents.length === 0) {
       const message = "At least one document is required";
       setError("documents", { type: "required", message });
       setDocumentError(message);
       return;
     }
-
+ 
     try {
       setSaving(true);
-
+ 
       const payload: CreateProjectPayload = { ...data, developers };
-
+ 
       if (!isEditing) {
         await createProject(
           payload,
@@ -425,7 +401,7 @@ export default function ProjectFormInline({
         );
         showSuccessToast("Project updated successfully.");
       }
-
+ 
       onSaved?.();
     } catch (error: any) {
       console.error(error);
@@ -436,20 +412,20 @@ export default function ProjectFormInline({
       setSaving(false);
     }
   };
-
+ 
   const removeDocument = (id: string) => {
     setDocuments((prev) => prev.filter((doc) => doc.id !== id));
   };
-
+ 
   return (
     <div className="">
       <div className=" ">
         <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/projects", label: "Projects" }, { label: pageTitle }]} />
-
+ 
         <h2 className="text-[20px] font-semibold leading-[100%] tracking-[0%] text-[#00076F] font-[Poppins] mb-4">
           {pageTitle}
         </h2>
-         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -462,8 +438,8 @@ export default function ProjectFormInline({
                 {...register("name", { required: true })}
                 disabled={isViewOnly}
                 placeholder="Enter Project Name"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 
-             placeholder:font-[Poppins] placeholder:font-medium placeholder:text-[14px] 
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500
+             placeholder:font-[Poppins] placeholder:font-medium placeholder:text-[14px]
              placeholder:leading-[100%] placeholder:tracking-normal placeholder:text-[#7A7A7A]"
               />
               {errors.name && (
@@ -472,7 +448,7 @@ export default function ProjectFormInline({
                 </p>
               )}
             </div>
-
+ 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Description
@@ -494,7 +470,7 @@ export default function ProjectFormInline({
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Assigned To
                 </label>
-
+ 
                 {/* Selected Cards */}
                 {assignedTo.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2">
@@ -523,7 +499,7 @@ export default function ProjectFormInline({
                     })}
                   </div>
                 )}
-
+ 
                 {/* Dropdown Button */}
                 <div
                   onClick={() =>
@@ -535,7 +511,7 @@ export default function ProjectFormInline({
                     ? `${assignedTo.length} selected`
                     : "Select Assigned To"}
                 </div>
-
+ 
                 {/* Dropdown Options */}
                 {isAssignedOpen && (
                   <div className="absolute mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-10 p-3">
@@ -556,9 +532,9 @@ export default function ProjectFormInline({
                   </div>
                 )}
               </div>)}
-
+ 
             </div>
-
+ 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -646,13 +622,12 @@ export default function ProjectFormInline({
               </div>
             </div>
           </div>
-          </form>
           {/* card two */}
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <label className="block font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-2">
               Environment Links
             </label>
-
+ 
             <div className="space-y-4">
               {[
                 {
@@ -682,7 +657,7 @@ export default function ProjectFormInline({
                       >
                         {env.label}
                       </div>
-
+ 
                       <input
                         {...register(env.name as keyof CreateProjectPayload, {
                           required: `${env.label} URL is required`,
@@ -732,16 +707,16 @@ export default function ProjectFormInline({
                 <button
                   type="button"
                   onClick={addDeveloper}
-                  className="rounded-xl border border-[#0059FF] bg-white px-4 py-2 
-             font-[Poppins] font-medium text-[14px] 
-             leading-[100%] tracking-normal text-center align-middle 
+                  className="rounded-xl border border-[#0059FF] bg-white px-4 py-2
+             font-[Poppins] font-medium text-[14px]
+             leading-[100%] tracking-normal text-center align-middle
              text-[#0059FF] hover:bg-blue-50 transition"
                 >
                   Add
                 </button>
               )}
             </div>
-
+ 
             <div className="mt-3 flex flex-wrap gap-2">
               {developers.map((d) => (
                 <div
@@ -768,12 +743,12 @@ export default function ProjectFormInline({
               </p>
             )}
           </div>
-
+ 
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <label className="block font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-2">
               Documents
             </label>
-
+ 
             {/* 2 Column Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Side - Drag & Drop Upload */}
@@ -792,17 +767,17 @@ export default function ProjectFormInline({
                     <div className="w-14 h-14 flex items-center justify-center rounded-full border-2 border-blue-500 text-blue-600 mb-4">
                       <FiUploadCloud size={28} />
                     </div>
-
+ 
                     <p className="font-[Poppins] font-medium text-[16px] leading-6 text-center text-slate-800">
                       Drag & drop files or{" "}
                       <span className="text-blue-600 underline">Browse</span>
                     </p>
-
+ 
                     <p className="font-[Poppins] font-normal text-[12px] leading-[18px] text-center text-[#444444] mt-2">
                       Supported formats: JPEG, PNG, GIF, MP4, PDF, PSD, AI,
                       Word, PPT
                     </p>
-
+ 
                     <input
                       type="file"
                       hidden
@@ -812,7 +787,7 @@ export default function ProjectFormInline({
                   </label>
                 </div>
               )}
-
+ 
               {/* Right Side - Uploaded Files List */}
               <div className="space-y-3">
                 {documents.length > 0 ? (
@@ -838,7 +813,7 @@ export default function ProjectFormInline({
                           </p>
                         )}
                       </div>
-
+ 
                       {/* View (eye) and Delete Icons */}
                       <div className="flex items-center gap-2">
                         <button
@@ -852,7 +827,7 @@ export default function ProjectFormInline({
                         >
                           <FiEye size={14} className="text-[#0059FF]" />
                         </button>
-
+ 
                         {!isViewOnly && (
                           <button
                             type="button"
@@ -876,7 +851,7 @@ export default function ProjectFormInline({
                 )}
               </div>
             </div>
-
+ 
             {(errors.documents || documentError) && (
               <p className="mt-2 text-sm text-red-500">
                 {documentError || errors.documents?.message}
@@ -887,23 +862,23 @@ export default function ProjectFormInline({
             {/* Cancel Button */}
             <button
               type="button"
-              className="w-24.75 h-11.25 px-6 py-3 rounded-lg border border-[#7A7A7A] 
-                 bg-white font-[Poppins] font-medium text-[14px] 
-                 leading-[100%] tracking-normal text-center align-middle 
+              className="w-24.75 h-11.25 px-6 py-3 rounded-lg border border-[#7A7A7A]
+                 bg-white font-[Poppins] font-medium text-[14px]
+                 leading-[100%] tracking-normal text-center align-middle
                  text-[#7A7A7A] hover:bg-gray-50 transition"
             >
               Cancel
             </button>
-
+ 
             {/* Save Details Button */}
             <button
               type="submit"
-              className=" h-11.25 px-6 py-3 rounded-lg 
-                 bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] 
-                 font-[Poppins] font-medium text-[14px] 
-                 leading-[100%] tracking-normal text-center align-middle 
-                 text-white 
-                 shadow-[0px_2px_6px_rgba(0,0,0,0.15)] 
+              className=" h-11.25 px-6 py-3 rounded-lg
+                 bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)]
+                 font-[Poppins] font-medium text-[14px]
+                 leading-[100%] tracking-normal text-center align-middle
+                 text-white
+                 shadow-[0px_2px_6px_rgba(0,0,0,0.15)]
                  hover:opacity-90 transition"
               style={{
                 borderImage:
@@ -913,9 +888,9 @@ export default function ProjectFormInline({
               Save Details
             </button>
           </div>
-       
+        </form>
       </div>
-
+ 
       {previewDocument && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
           <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
@@ -958,7 +933,6 @@ export default function ProjectFormInline({
             </div>
           </div>
         </div>
-        
       )}
     </div>
   );
