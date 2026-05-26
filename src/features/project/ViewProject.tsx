@@ -11,7 +11,8 @@ import {
   Eye,
   User,
 } from "lucide-react";
-import { FiArrowLeft, FiChevronRight } from "react-icons/fi";
+import { FiArrowLeft, FiChevronRight, FiX } from "react-icons/fi";
+import Breadcrumb from "../../components/common/Breadcrumb";
 import { getProjectById } from "./api/projectApi";
 import type { Project } from "./types/project.types";
 
@@ -23,6 +24,97 @@ function ViewProject() {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
+
+  const [previewDocument, setPreviewDocument] = useState<any | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState("");
+  const getDocumentUrl = (doc: any) => {
+    const docBaseUrl = import.meta.env.VITE_DOC_VIEW_URL?.replace(/\/$/, "");
+    const rawUrl = doc?.url || doc?.path || doc?.fileUrl || "";
+
+    if (!rawUrl) return "";
+    if (String(rawUrl).startsWith("http")) return String(rawUrl);
+    if (docBaseUrl) {
+      const cleanPath = String(rawUrl).startsWith("/")
+        ? String(rawUrl).slice(1)
+        : String(rawUrl);
+      return `${docBaseUrl}/${cleanPath}`;
+    }
+    return String(rawUrl);
+  };
+
+  const canPreviewInIframe = (doc: any) => {
+    const url = getDocumentUrl(doc);
+    if (!url) return false;
+    if (doc.file) return true;
+
+    try {
+      const parsed = new URL(url);
+      return parsed.origin === window.location.origin;
+    } catch {
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+
+    const loadPreview = async () => {
+      if (!previewDocument) {
+        setPreviewUrl("");
+        setPreviewError("");
+        setPreviewLoading(false);
+        return;
+      }
+
+      setPreviewError("");
+      const directUrl = getDocumentUrl(previewDocument);
+      if (previewDocument.file) {
+        objectUrl = URL.createObjectURL(previewDocument.file);
+        setPreviewUrl(objectUrl);
+        setPreviewLoading(false);
+        return;
+      }
+
+      if (!directUrl) {
+        setPreviewUrl("");
+        setPreviewError("Preview URL unavailable.");
+        return;
+      }
+
+      if (canPreviewInIframe(previewDocument)) {
+        setPreviewUrl(directUrl);
+        return;
+      }
+
+      setPreviewLoading(true);
+      try {
+        const response = await fetch(directUrl);
+        if (!response.ok) {
+          throw new Error(`Preview fetch failed: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        setPreviewUrl(objectUrl);
+      } catch (error) {
+        console.error("Failed to load preview blob", error);
+        setPreviewUrl("");
+        setPreviewError("Unable to preview this document in the embedded frame.");
+      } finally {
+        setPreviewLoading(false);
+      }
+    };
+
+    loadPreview();
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [previewDocument]);
 
   useEffect(() => {
     if (!id) {
@@ -70,20 +162,17 @@ function ViewProject() {
     );
   }
 
-  const getDocumentUrl = (doc: any) => {
-    const docBaseUrl = import.meta.env.VITE_DOC_VIEW_URL?.replace(/\/$/, "");
-    const rawUrl = doc?.url || doc?.path || doc?.fileUrl || "";
-
-    if (!rawUrl) return "";
-    if (String(rawUrl).startsWith("http")) return String(rawUrl);
-    if (docBaseUrl) {
-      const cleanPath = String(rawUrl).startsWith("/")
-        ? String(rawUrl).slice(1)
-        : String(rawUrl);
-      return `${docBaseUrl}/${cleanPath}`;
+  const assignedToList: string[] =
+    project?.members?.map((m: any) => m?.assignedTo?.name).filter(Boolean) || [];
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
     }
-    return String(rawUrl);
-  };
+  })();
+  const userRole = String(currentUser?.role || "").toUpperCase();
+  const isAdmin = userRole === "ADMIN";
 
   const projectData = [
     {
@@ -96,6 +185,29 @@ function ViewProject() {
       label: "DESCRIPTION",
       value: project?.description || "-",
     },
+    ...(isAdmin
+      ? [
+          {
+            icon: <Users size={20} className="text-blue-600" />,
+            label: "ASSIGNED TO",
+            value:
+              assignedToList.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {assignedToList.map((name) => (
+                    <span
+                      key={name}
+                      className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+                    >
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                "-"
+              ),
+          },
+        ]
+      : []),
     {
       icon: <Users size={20} className="text-blue-600" />,
       label: "DEVELOPERS",
@@ -135,13 +247,7 @@ function ViewProject() {
     },
   ];
 
-  const files = project?.documents?.map((doc: any) => ({
-    name:
-      doc?.originalName || doc?.name || doc?.filename ||
-      String(doc?.url || "").split("/").pop() || "Untitled",
-    url: getDocumentUrl(doc),
-    type: doc?.fileType || doc?.mimeType || "file",
-  })) || [];
+  const docs = project?.documents || [];
 
   const remarksData = [
     {
@@ -161,16 +267,7 @@ function ViewProject() {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1 text-sm font-[Poppins] mb-2">
-        <Link to="/" className="text-[#0059FF] hover:underline">
-          Home
-        </Link>
-        <FiChevronRight size={14} className="text-slate-400" />
-        <span className="text-slate-500">Users</span>
-        <FiChevronRight size={14} className="text-slate-400" />
-        <span className="text-slate-500">Project Details</span>
-      </nav>
+      <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/projects", label: "Projects" }, { label: "Project Details" }]} />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
@@ -199,14 +296,20 @@ function ViewProject() {
               </div>
 
               <div className="flex-1 space-y-2">
-                <p className="font-medium text-xs uppercase text-[#7A7A7A]">
-                  {item.label}
-                </p>
+                    <p className="font-medium text-xs uppercase text-[#7A7A7A]">
+                      {item.label}
+                    </p>
 
-                <p className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
-                  {item.value}
-                </p>
-              </div>
+                    {typeof item.value === "string" ? (
+                      <p className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
+                        {item.value}
+                      </p>
+                    ) : (
+                      <div className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
+                        {item.value}
+                      </div>
+                    )}
+                  </div>
             </div>
           ))}
         </div>
@@ -233,6 +336,35 @@ function ViewProject() {
         </div>
       </div>
 
+        {previewDocument && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
+            <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4">
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Document Preview</h2>
+                  <p className="mt-1 text-sm text-slate-500 truncate">{previewDocument?.originalName || previewDocument?.name || previewDocument?.filename || (previewDocument?.url ? String(previewDocument.url).split("/").pop() : "Untitled")}</p>
+                </div>
+                <button onClick={() => setPreviewDocument(null)} className="rounded-lg p-2 hover:bg-slate-100">
+                  <FiX size={20} />
+                </button>
+              </div>
+              <div className="h-[60vh] sm:h-[75vh] bg-slate-100">
+                {previewLoading ? (
+                  <div className="flex h-full items-center justify-center text-sm text-slate-500">Loading document preview...</div>
+                ) : previewUrl ? (
+                  <iframe title={previewDocument?.originalName || "document-preview"} src={previewUrl} className="h-full w-full rounded-b-2xl" />
+                ) : previewError ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-sm text-slate-500">
+                    <p className="text-center">{previewError}</p>
+                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-slate-500">Document preview is not available for this file.</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
       {/* Documents Card */}
       <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
         <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
@@ -240,32 +372,34 @@ function ViewProject() {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {files.length > 0 ? (
-            files.map((file, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between bg-[#EEF4FF] rounded-lg px-4 py-3"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 flex items-center justify-center">
-                    <FileText size={22} className="text-[#0059FF]" />
+          {docs.length > 0 ? (
+            docs.map((doc: any, index: number) => {
+              const name = doc?.originalName || doc?.name || doc?.filename || String(doc?.url || "").split("/").pop() || "Untitled";
+              return (
+                <div
+                  key={doc.id || index}
+                  className="flex items-center justify-between bg-[#EEF4FF] rounded-lg px-4 py-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 flex items-center justify-center">
+                      <FileText size={22} className="text-[#0059FF]" />
+                    </div>
+
+                    <p className="font-medium text-sm sm:text-base text-[#1E1E1E] truncate">
+                      {name}
+                    </p>
                   </div>
 
-                  <p className="font-medium text-sm sm:text-base text-[#1E1E1E] truncate">
-                    {file.name}
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewDocument(doc)}
+                    className="ml-3"
+                  >
+                    <Eye size={20} className="text-[#00076F]" />
+                  </button>
                 </div>
-
-                <a
-                  href={file.url || "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ml-3"
-                >
-                  <Eye size={20} className="text-[#00076F]" />
-                </a>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="rounded-2xl bg-[#f9fafc] px-4 py-6 text-sm text-slate-500">
               No documents available

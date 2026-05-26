@@ -13,6 +13,7 @@ import {
   FiX,
   FiEye,
 } from "react-icons/fi";
+import Breadcrumb from "../../components/common/Breadcrumb";
 import type {
   CreateProjectPayload,
   Project,
@@ -52,11 +53,20 @@ export default function ProjectFormInline({
 }: Props) {
   const isEditing = !!project || !!isEditMode;
   const isViewOnly = !!isViewMode;
+  const pageTitle = isViewOnly ? "View Project" : isEditing ? "Edit Project" : "Add Project";
   const [previewDocument, setPreviewDocument] =
     useState<ProjectDocument | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState("");
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  })();
+  const userRole = String(currentUser?.role || "").toUpperCase();
 
   const getDocumentUrl = (doc: ProjectDocument) => {
     const docBaseUrl = import.meta.env.VITE_DOC_VIEW_URL?.replace(/\/$/, "");
@@ -409,16 +419,11 @@ export default function ProjectFormInline({
 
   return (
     <div className="">
-      <div
-        className=" 
-   "
-      >
+      <div className=" ">
+        <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/projects", label: "Projects" }, { label: pageTitle }]} />
+
         <h2 className="text-[20px] font-semibold leading-[100%] tracking-[0%] text-[#00076F] font-[Poppins] mb-4">
-          {isViewOnly
-            ? "View Project"
-            : isEditing
-              ? "Edit Project"
-              : "Add Project"}
+          {pageTitle}
         </h2>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
@@ -461,7 +466,7 @@ export default function ProjectFormInline({
                   {errors.description.message}
                 </p>
               )}
-              <div className="relative">
+              {userRole == "ADMIN" && (<div className="relative">
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Assigned To
                 </label>
@@ -526,7 +531,8 @@ export default function ProjectFormInline({
                     ))}
                   </div>
                 )}
-              </div>
+              </div>)}
+
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

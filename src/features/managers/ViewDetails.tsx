@@ -17,6 +17,7 @@ import type { Project } from "../project/types/project.types";
 import { listProjectsForUser } from "../project/api/projectApi";
 import StatusBadge from "../project/StatusBadge";
 import PriorityBadge from "../project/PriorityBadge";
+import Breadcrumb from "../../components/common/Breadcrumb";
 
 interface Manager {
   name?: string;
@@ -75,6 +76,7 @@ function ViewDetails() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
+          <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/managers", label: "Users" }, { label: "User Details" }]} />
           <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
             User Details
           </h2>

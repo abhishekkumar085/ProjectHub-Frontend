@@ -5,6 +5,7 @@ import { FiArrowLeft, FiChevronRight } from "react-icons/fi";
 import { createManager } from "./api/managerApi";
 import type { CreateManagerPayload } from "./types/manager.types";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import Breadcrumb from "../../components/common/Breadcrumb";
 
 function AddManager() {
   const navigate = useNavigate();
@@ -75,13 +76,7 @@ function AddManager() {
   return (
     <div className="w-full ">
       {/* Breadcrumb */}
-      <nav className="flex flex-wrap items-center gap-1 text-sm font-[Poppins] mb-2">
-        <Link to="/" className="text-[#0059FF] hover:underline">
-          Home
-        </Link>
-        <FiChevronRight size={14} className="text-slate-400" />
-        <span className="text-slate-500">Users</span>
-      </nav>
+      <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/managers", label: "Users" }, { label: "Add User" }]} />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">

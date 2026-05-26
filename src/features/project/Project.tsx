@@ -28,6 +28,14 @@ function Projects() {
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const navigate = useNavigate();
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  })();
+  const userRole = String(currentUser?.role || "").toUpperCase();
 
   // const user = JSON.parse(
   //   localStorage.getItem("user") || "{}"
@@ -79,7 +87,7 @@ function Projects() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Projects</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#00076F]">Projects</h2>
           <p className="text-sm text-slate-500">({total} results found)</p>
         </div>
 
@@ -96,17 +104,19 @@ function Projects() {
             />
           </div>
 
-          <button
-            onClick={() => navigate("/projects/add-edit")}
-            className="inline-flex h-[40px] sm:h-[45px] items-center gap-2 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium text-white whitespace-nowrap"
-            style={{
-              background: "linear-gradient(90deg, #0059FF 0%, #003699 100%)",
-            }}
-          >
-            <img src={plusIcon} alt="+" className="h-4 w-4 object-contain" />
-            <span className="hidden sm:inline">Add Project</span>
-            <span className="sm:hidden">Add</span>
-          </button>
+          {userRole !== "MANAGER" && (
+            <button
+              onClick={() => navigate("/projects/add-edit")}
+              className="inline-flex h-[40px] sm:h-[45px] items-center gap-2 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium text-white whitespace-nowrap"
+              style={{
+                background: "linear-gradient(90deg, #0059FF 0%, #003699 100%)",
+              }}
+            >
+              <img src={plusIcon} alt="+" className="h-4 w-4 object-contain" />
+              <span className="hidden sm:inline">Add Project</span>
+              <span className="sm:hidden">Add</span>
+            </button>
+          )}
         </div>
       </div>
 
