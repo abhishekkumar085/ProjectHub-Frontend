@@ -856,7 +856,7 @@ showSuccessToast("Project created and assigned successfully.");
               Save Details
             </button>
           </div>
-        </form>
+       
       </div>
 
       {previewDocument && (
