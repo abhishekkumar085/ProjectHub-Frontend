@@ -171,11 +171,13 @@ function ViewProject() {
         <FiChevronRight size={14} className="text-slate-400" />
         <span className="text-slate-500">Project Details</span>
       </nav>
-      {/* Basic Information Card */}
+
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
-        <h1 className=" mt-5 font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-[0px] text-[#00076F]">
+        <h1 className="mt-5 font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-[0px] text-[#00076F]">
           Project Details
-        </h1>{" "}
+        </h1>
+
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 px-4 py-2 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
