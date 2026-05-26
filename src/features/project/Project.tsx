@@ -202,7 +202,7 @@ function Projects() {
                   <td className="pl-3 pr-[30px] py-2 text-center rounded-r-lg border-y border-r border-[#F5F5F5]">
                     <div className="inline-flex items-center justify-center gap-2">
                       <button
-                        onClick={() => navigate("/projects/add-edit", { state: { projectId: p.id, viewOnly: true } })}
+                        onClick={() => navigate(`/projects/view/${p.id}`)}
                         className="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] gap-2 p-2 bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
                       >
                         <FiEye size={16} />
