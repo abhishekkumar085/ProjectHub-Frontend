@@ -145,6 +145,9 @@ export const createProject = async (
   files.forEach((file) => {
     formData.append("documents", file);
   });
+  if (payload.assignedUsers && Array.isArray(payload.assignedUsers)) {
+    formData.append("assignedUsers", JSON.stringify(payload.assignedUsers));
+  }
 
   const res = await api.post("/project/create-project", formData);
   return res.data.data;
@@ -181,6 +184,9 @@ export const updateProject = async (
   files.forEach((file) => {
     formData.append("documents", file);
   });
+  if ((payload as any).assignedUsers && Array.isArray((payload as any).assignedUsers)) {
+    formData.append("assignedUsers", JSON.stringify((payload as any).assignedUsers));
+  }
 
   const res = await api.patch(`/project/update-project/${id}`, formData);
   return res.data.data;

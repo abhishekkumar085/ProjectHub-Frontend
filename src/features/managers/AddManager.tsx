@@ -1,7 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
-import { FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiChevronRight } from "react-icons/fi";
 import { createManager } from "./api/managerApi";
 import type { CreateManagerPayload } from "./types/manager.types";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
@@ -73,26 +73,30 @@ function AddManager() {
   };
 
   return (
-    <div className="">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 ">
+    <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
+      {/* Breadcrumb */}
+      <nav className="flex flex-wrap items-center gap-1 text-sm font-[Poppins] mb-2">
+        <Link to="/" className="text-[#0059FF] hover:underline">
+          Home
+        </Link>
+        <FiChevronRight size={14} className="text-slate-400" />
+        <span className="text-slate-500">Users</span>
+      </nav>
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-slate-900">
+          <h1 className="font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-[0px] text-[#00076F]">
             Add Users
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Complete the manager details and save to add a new manager.
-          </p>
         </div>
 
         <button
           onClick={() => navigate("/managers")}
-          className="inline-flex items-center gap-2  px-4 py-2 
-             font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] 
-             text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
         >
           <FiArrowLeft />
-          <span className="hidden sm:inline">Back</span>
-          <span className="sm:hidden">Back</span>
+          <span>Back</span>
         </button>
       </div>
 
@@ -101,15 +105,18 @@ function AddManager() {
         onSubmit={handleSubmit(onSubmit)}
         className="mt-4"
       >
-        <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-          <h1 className="ont-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-2">
+        {/* Card */}
+        <div className="w-full p-4 sm:p-5 lg:p-6 space-y-4 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
+          <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0px] text-[#161616] mb-2">
             Basic Information
           </h1>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mt-3">
+          {/* Form Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mt-3">
+            {/* Full Name */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">
-                Full Name *
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+                Full Name <span className="text-red-500">*</span>
               </label>
               <input
                 {...register("name", {
@@ -119,7 +126,7 @@ function AddManager() {
                     message: "Full name must be at least 2 characters",
                   },
                 })}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                 placeholder="John Doe"
               />
               {errors.name && (
@@ -129,9 +136,10 @@ function AddManager() {
               )}
             </div>
 
+            {/* Email */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">
-                Email *
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -142,7 +150,7 @@ function AddManager() {
                     message: "Enter a valid email address",
                   },
                 })}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                 placeholder="manager@example.com"
               />
               {errors.email && (
@@ -152,9 +160,10 @@ function AddManager() {
               )}
             </div>
 
+            {/* Employee ID */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">
-                Employee ID *
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+                Employee ID <span className="text-red-500">*</span>
               </label>
               <input
                 {...register("empId", {
@@ -164,7 +173,7 @@ function AddManager() {
                     message: "Employee ID must be at least 2 characters",
                   },
                 })}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                 placeholder="EMP001"
               />
               {errors.empId && (
@@ -174,19 +183,21 @@ function AddManager() {
               )}
             </div>
 
+            {/* Designation */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
                 Designation
               </label>
               <input
                 {...register("designation")}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                 placeholder="Project Manager"
               />
             </div>
 
+            {/* Role */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
                 Role <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -214,6 +225,7 @@ function AddManager() {
                       styles={{
                         control: (base) => ({
                           ...base,
+                          width: "100%",
                           borderRadius: "0.75rem",
                           borderColor: "#cbd5e1",
                           minHeight: "3rem",
@@ -235,8 +247,9 @@ function AddManager() {
               )}
             </div>
 
+            {/* Mobile Number */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
                 Mobile Number <span className="text-red-500">*</span>
               </label>
               <input
@@ -248,7 +261,7 @@ function AddManager() {
                     message: "Enter a valid mobile number",
                   },
                 })}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                 placeholder="9876543210"
               />
               {errors.mobileNumber && (
@@ -258,9 +271,10 @@ function AddManager() {
               )}
             </div>
 
+            {/* Password */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">
-                Password *
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+                Password <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
@@ -276,7 +290,7 @@ function AddManager() {
                 onPaste={preventCopyPaste}
                 onCut={preventCopyPaste}
                 onKeyDown={preventCopyPaste}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                 placeholder="Enter password"
               />
               {errors.password && (
@@ -286,9 +300,10 @@ function AddManager() {
               )}
             </div>
 
+            {/* Confirm Password */}
             <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-600">
-                Confirm Password *
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+                Confirm Password <span className="text-red-500">*</span>
               </label>
               <input
                 type="password"
@@ -302,7 +317,7 @@ function AddManager() {
                 onPaste={preventCopyPaste}
                 onCut={preventCopyPaste}
                 onKeyDown={preventCopyPaste}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
                 placeholder="Re-enter password"
               />
               {errors.confirmPassword && (
@@ -314,18 +329,25 @@ function AddManager() {
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+        {/* Buttons */}
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:justify-end">
           <button
             type="button"
             onClick={() => navigate("/managers")}
-            className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             Cancel
           </button>
+
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full sm:w-[135px] h-[45px] rounded-[8px] border
+        bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)]
+        px-6 py-3 font-[Poppins] font-medium text-[14px]
+        leading-[100%] tracking-[0px] text-center text-white
+        transition hover:opacity-90
+        disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting ? "Saving..." : "Save"}
           </button>

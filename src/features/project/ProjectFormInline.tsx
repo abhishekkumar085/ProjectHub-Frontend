@@ -54,23 +54,107 @@ export default function ProjectFormInline({
   const isViewOnly = !!isViewMode;
   const [previewDocument, setPreviewDocument] =
     useState<ProjectDocument | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState("");
 
   const getDocumentUrl = (doc: ProjectDocument) => {
-    if (doc.file) {
-      return URL.createObjectURL(doc.file);
+    const docBaseUrl = import.meta.env.VITE_DOC_VIEW_URL?.replace(/\/$/, "");
+
+    // already full url
+    if (doc.url?.startsWith("http")) {
+      return doc.url;
     }
 
-    const baseUrl = (api.defaults.baseURL || "").replace(/\/$/, "");
-    if (doc.filename?.startsWith("http")) {
-      return doc.filename;
+    // backend relative path
+    if (doc.url) {
+      const cleanPath = doc.url.startsWith("/")
+        ? doc.url
+        : `/${doc.url}`;
+
+      return `${docBaseUrl}${cleanPath}`;
     }
 
-    if (doc.projectId && doc.filename) {
-      return `${baseUrl}/project/${doc.projectId}/documents/${encodeURIComponent(doc.filename)}`;
+    // fallback filename
+    if (doc.filename) {
+      return `${docBaseUrl}/uploads/${encodeURIComponent(doc.filename)}`;
     }
 
     return "";
   };
+
+  const canPreviewInIframe = (doc: ProjectDocument) => {
+    const url = getDocumentUrl(doc);
+    if (!url) return false;
+    if (doc.file) return true;
+
+    try {
+      const parsed = new URL(url);
+      return parsed.origin === window.location.origin;
+    } catch {
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    const loadPreview = async () => {
+      if (!previewDocument) {
+        setPreviewUrl("");
+        setPreviewError("");
+        setPreviewLoading(false);
+        return;
+      }
+
+      setPreviewError("");
+      const directUrl = getDocumentUrl(previewDocument);
+      if (previewDocument.file) {
+        objectUrl = URL.createObjectURL(previewDocument.file);
+        setPreviewUrl(objectUrl);
+        setPreviewLoading(false);
+        return;
+      }
+
+      if (!directUrl) {
+        setPreviewUrl("");
+        setPreviewError("Preview URL unavailable.");
+        return;
+      }
+
+      if (canPreviewInIframe(previewDocument)) {
+        setPreviewUrl(directUrl);
+        return;
+      }
+
+      setPreviewLoading(true);
+      try {
+        const response = await fetch(directUrl);
+        if (!response.ok) {
+          throw new Error(`Preview fetch failed: ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        objectUrl = URL.createObjectURL(blob);
+        setPreviewUrl(objectUrl);
+      } catch (error) {
+        console.error("Failed to load preview blob", error);
+        setPreviewUrl("");
+        setPreviewError(
+          "Unable to preview this document in the embedded frame.",
+        );
+      } finally {
+        setPreviewLoading(false);
+      }
+    };
+
+    loadPreview();
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [previewDocument]);
 
   const [saving, setSaving] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -81,8 +165,29 @@ export default function ProjectFormInline({
   const [documentError, setDocumentError] = useState("");
 
   const [isAssignedOpen, setIsAssignedOpen] = useState(false);
-  const [assignedTo, setAssignedTo] = useState<string[]>([]);
-  const [assignedOptions, setAssignedOptions] = useState<any[]>([]);
+  const [assignedTo, setAssignedTo] = useState<string[]>([]); // store selected user IDs
+  const [assignedOptions, setAssignedOptions] = useState<{
+    id: string;
+    name: string;
+    email?: string;
+  }[]>([]);
+
+  useEffect(() => {
+    const fetchAssignableUsers = async () => {
+      try {
+        const res = await api.get("/project/assignable-users");
+        const users = res?.data?.data || [];
+        setAssignedOptions(
+          users.map((u: any) => ({ id: u.id, name: u.name || u.email, email: u.email })),
+        );
+      } catch (err) {
+        console.error("Failed to fetch assignable users", err);
+      }
+    };
+
+    fetchAssignableUsers();
+  }, []);
+
   const handleAssignedChange = (value: string) => {
     setAssignedTo((prev) =>
       prev.includes(value)
@@ -140,10 +245,18 @@ export default function ProjectFormInline({
 
       setDevelopers(project.developers || []);
       setDocuments(project.documents || []);
+      if ((project as any).members && Array.isArray((project as any).members)) {
+        const assignedUserIds = (project as any).members.map(
+          (member: any) => member.assignedTo?.id
+        );
+
+        setAssignedTo(assignedUserIds);
+      }
     } else {
       reset();
       setDevelopers([]);
       setDocuments([]);
+      setAssignedTo([]);
     }
   }, [project, reset]);
 
@@ -322,7 +435,7 @@ showSuccessToast("Project created and assigned successfully.");
                 placeholder="Enter Project Name"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 
              placeholder:font-[Poppins] placeholder:font-medium placeholder:text-[14px] 
-             placeholder:leading-[100%] placeholder:tracking-[0px] placeholder:text-[#7A7A7A]"
+             placeholder:leading-[100%] placeholder:tracking-normal placeholder:text-[#7A7A7A]"
               />
               {errors.name && (
                 <p className="mt-1 text-sm text-red-500">
@@ -356,64 +469,49 @@ showSuccessToast("Project created and assigned successfully.");
                 {/* Selected Cards */}
                 {assignedTo.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-2">
-                   {assignedTo.map((personId) => {
-
-                    const user = assignedOptions.find(
-                      (u: any) => u.id === personId
-                    );
-
-                    return (
-                      <div
-                        key={personId}
-                        className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
-                      >
-                        {user?.name}
-
-                        {!isViewOnly && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-
-                              handleAssignedChange(personId);
-                            }}
-                            className="ml-1"
-                          >
-                            <FiX size={14} />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
+                    {assignedTo.map((userId) => {
+                      const u = assignedOptions.find((a) => a.id === userId);
+                      return (
+                        <div
+                          key={userId}
+                          className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+                        >
+                          {u?.name || userId}
+                          {!isViewOnly && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAssignedChange(userId);
+                              }}
+                              className="ml-1"
+                            >
+                              <FiX size={14} />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
                 {/* Dropdown Button */}
                 <div
-                  onClick={() =>
-                    !isViewOnly && setIsAssignedOpen(!isAssignedOpen)
-                  }
+                  onClick={() => !isViewOnly && setIsAssignedOpen(!isAssignedOpen)}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 cursor-pointer bg-white"
                 >
-                  {assignedTo.length > 0
-                    ? `${assignedTo.length} selected`
-                    : "Select Assigned To"}
+                  {assignedTo.length > 0 ? `${assignedTo.length} selected` : "Select Assigned To"}
                 </div>
 
                 {/* Dropdown Options */}
                 {isAssignedOpen && (
                   <div className="absolute mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-10 p-3">
-                    {assignedOptions.map((option: any) => (
-                      <label
-                        key={option.id}
-                        className="flex items-center gap-2 py-2"
-                      >
+                    {assignedOptions.map((option) => (
+                      <label key={option.id} className="flex items-center gap-2 py-2">
                         <input
                           type="checkbox"
                           checked={assignedTo.includes(option.id)}
-                         onChange={() =>
-                                handleAssignedChange(option.id)
-                              }
+                          onChange={() => handleAssignedChange(option.id)}
                           disabled={isViewOnly}
                         />
                         {option.name}
@@ -543,7 +641,7 @@ showSuccessToast("Project created and assigned successfully.");
                   <div className=" px-2 py-0 bg-white border border-[#E5E5E5] rounded-lg">
                     <div
                       key={env.name}
-                      className="grid gap-3 sm:grid-cols-[80px_1fr_auto] flex justify-center items-center"
+                      className="grid gap-3 sm:grid-cols-[80px_1fr_auto] justify-center items-center"
                     >
                       <div
                         className={`flex w-[55px] h-[30px] items-center justify-center rounded-[26px] px-4 py-[6px] text-xs font-bold ${env.color}`}
@@ -559,7 +657,15 @@ showSuccessToast("Project created and assigned successfully.");
                         })}
                         disabled={isViewOnly}
                         className="w-full rounded-xl px-4 py-3 outline-none focus:outline-none font-[Poppins] placeholder:text-[#7A7A7A] placeholder:font-medium placeholder:text-[14px] placeholder:leading-[100%] placeholder:tracking-[0px]"
-                        placeholder="Enter here..."
+                        placeholder={
+                          env.label === "DEV"
+                            ? "Enter Dev URL"
+                            : env.label === "UAT"
+                              ? "Enter UAT URL"
+                              : env.label === "PROD"
+                                ? "Enter PROD URL"
+                                : "Enter here..."
+                        }
                       />
                       {errors[env.name as keyof CreateProjectPayload] && (
                         <p className="sm:col-span-3 mt-1 text-sm text-red-500">
@@ -721,7 +827,36 @@ showSuccessToast("Project created and assigned successfully.");
               </p>
             )}
           </div>
-        
+          <div className="flex items-center justify-end gap-6 mt-4">
+            {/* Cancel Button */}
+            <button
+              type="button"
+              className="w-[99px] h-[45px] px-[24px] py-[12px] rounded-[8px] border border-[#7A7A7A] 
+                 bg-white font-[Poppins] font-medium text-[14px] 
+                 leading-[100%] tracking-[0px] text-center align-middle 
+                 text-[#7A7A7A] hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+
+            {/* Save Details Button */}
+            <button
+              type="submit"
+              className=" h-[45px] px-[24px] py-[12px] rounded-[8px] 
+                 bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] 
+                 font-[Poppins] font-medium text-[14px] 
+                 leading-[100%] tracking-[0px] text-center align-middle 
+                 text-white 
+                 shadow-[0px_2px_6px_rgba(0,0,0,0.15)] 
+                 hover:opacity-90 transition"
+              style={{
+                borderImage: "linear-gradient(90deg, #6B9FFF 0%, #0059FF 100%) 1",
+              }}
+            >
+              Save Details
+            </button>
+          </div>
+        </form>
       </div>
 
       {previewDocument && (
@@ -744,12 +879,20 @@ showSuccessToast("Project created and assigned successfully.");
               </button>
             </div>
             <div className="h-[60vh] sm:h-[75vh] bg-slate-100">
-              {getDocumentUrl(previewDocument) ? (
+              {previewLoading ? (
+                <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                  Loading document preview...
+                </div>
+              ) : previewUrl ? (
                 <iframe
-                  title={previewDocument.originalName}
-                  src={getDocumentUrl(previewDocument)}
+                  title={previewDocument?.originalName || "document-preview"}
+                  src={previewUrl}
                   className="h-full w-full rounded-b-2xl"
                 />
+              ) : previewError ? (
+                <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-sm text-slate-500">
+                  <p className="text-center">{previewError}</p>
+                </div>
               ) : (
                 <div className="flex h-full items-center justify-center text-sm text-slate-500">
                   Document preview is not available for this file.
@@ -760,38 +903,6 @@ showSuccessToast("Project created and assigned successfully.");
         </div>
         
       )}
-      
-     
-      <div className="flex items-center justify-end gap-6 mt-4">
-        {/* Cancel Button */}
-        <button
-          type="button"
-          className="w-[99px] h-[45px] px-[24px] py-[12px] rounded-[8px] border border-[#7A7A7A] 
-             bg-white font-[Poppins] font-medium text-[14px] 
-             leading-[100%] tracking-[0px] text-center align-middle 
-             text-[#7A7A7A] hover:bg-gray-50 transition"
-        >
-          Cancel
-        </button>
-
-        {/* Save Details Button */}
-        <button
-          type="submit"
-          className=" h-[45px] px-[24px] py-[12px] rounded-[8px] 
-             bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] 
-             font-[Poppins] font-medium text-[14px] 
-             leading-[100%] tracking-[0px] text-center align-middle 
-             text-white 
-             shadow-[0px_2px_6px_rgba(0,0,0,0.15)] 
-             hover:opacity-90 transition"
-          style={{
-            borderImage: "linear-gradient(90deg, #6B9FFF 0%, #0059FF 100%) 1",
-          }}
-        >
-          Save Details
-        </button>
-      </div>
-      
     </div>
   );
 }
