@@ -6,6 +6,7 @@ import MainLayout from "../layouts/MainLayout";
 import Login from "../features/auth/Login";
 import Projects from "../features/project/Project";
 import AddEditProjects from "../features/project/AddEditProjects";
+import ViewProject from "../features/project/ViewProject";
 import Managers from "../features/managers/Managers";
 import AddManager from "../features/managers/AddManager";
 import ViewDetails from "../features/managers/ViewDetails";
@@ -29,6 +30,7 @@ function AppRoutes() {
 
         <Route path="projects" element={<Projects/>} />
         <Route path="projects/add-edit" element={<AddEditProjects/>} />
+        <Route path="projects/view/:id" element={<ViewProject/>} />
         <Route path="my-projects" element={<Projects/>} />
         <Route path="managers" element={<Managers/>} />
         <Route path="managers/add" element={<AddManager/>} />
