@@ -102,17 +102,7 @@ function Pagination({
 
       <div className="flex items-center gap-2 text-sm text-slate-600">
         <span>Page</span>
-        <select
-          value={page}
-          onChange={(e) => onPageChange?.(Number(e.target.value))}
-          className="h-8 rounded-lg border border-slate-200 bg-white pl-2 pr-6 text-sm text-slate-700 outline-none focus:border-blue-500 appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[position:right_8px_center] bg-no-repeat"
-        >
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <option key={p} value={p}>
-              {p}
-            </option>
-          ))}
-        </select>
+        <span className="font-medium text-slate-800">{page}</span>
         <span>of {totalPages}</span>
       </div>
     </div>

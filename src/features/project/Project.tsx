@@ -217,12 +217,11 @@ function Projects() {
                     <div className="inline-flex items-center justify-center gap-2">
                       <button
                         onClick={() => navigate(`/projects/view/${p.id}`)}
-                        className="relative flex h-[32px] w-[32px] items-center justify-center rounded-[8px] bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
+                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
                       >
                         <FiEye size={16} />
 
-                        {/* Red Dot */}
-                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                        
                       </button>
                       <button
                         onClick={() =>
@@ -230,10 +229,13 @@ function Projects() {
                             state: { projectId: p.id },
                           })
                         }
-                        className="flex h-[32px] w-[32px] items-center justify-center rounded-[8px] gap-2 p-2 bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
+                        className="relative flex h-[32px] w-[32px] items-center justify-center rounded-[8px] gap-2 p-2 bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
                       >
                         <FiEdit2 size={16} />
+                        {/* Red Dot */}
+                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500"></span>
                       </button>
+                      
 
                       <button
                         onClick={() => handleDelete(p.id)}

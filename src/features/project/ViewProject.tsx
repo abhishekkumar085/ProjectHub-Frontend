@@ -11,7 +11,7 @@ import {
   Eye,
   User,
 } from "lucide-react";
-import { FiArrowLeft, FiChevronRight, FiX } from "react-icons/fi";
+import { FiArrowLeft, FiX } from "react-icons/fi";
 import Breadcrumb from "../../components/common/Breadcrumb";
 import { getProjectById } from "./api/projectApi";
 import type { Project } from "./types/project.types";

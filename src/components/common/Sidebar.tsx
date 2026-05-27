@@ -29,9 +29,13 @@ function Sidebar({ collapsed, mobileOpen, onMobileClose }: SidebarProps) {
       {/* Top Section */}
       <div className="flex h-20 items-center justify-start px-5">
         {collapsed ? (
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-lg font-bold text-white shadow-sm">
-            PH
-          </div>
+          <div className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#0059FF_0%,#003699_100%)] text-lg font-extrabold text-white shadow-[0_10px_25px_rgba(0,89,255,0.35)] transition-all duration-300 hover:scale-105">
+      {/* Glow */}
+      <div className="absolute inset-0 bg-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+
+      {/* Text */}
+      <span className="relative z-10 tracking-wide">PH</span>
+    </div>
         ) : (
           <h1 className="ml-3 text-2xl font-bold">
             <span className="text-[#0059FF]">Project</span>

@@ -9,9 +9,20 @@ interface HeaderProps {
   onMobileOpen?: () => void;
 }
 import { FiUser, FiLock, FiLogOut } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 function Header({ collapsed, onToggle, onMobileOpen }: HeaderProps) {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  const currentUser = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  })();
+  const userRole = String(currentUser?.name || "").toUpperCase();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -65,7 +76,7 @@ function Header({ collapsed, onToggle, onMobileOpen }: HeaderProps) {
           )}
         </button>
         <h2 className="hidden sm:block text-sm font-medium text-gray-800 font-[Poppins]">
-          Welcome, <span className="text-[#0059FF]">Admin User</span>
+          Welcome, <span className="text-[#0059FF]">{userRole}</span>
         </h2>
       </div>
 
@@ -79,9 +90,9 @@ function Header({ collapsed, onToggle, onMobileOpen }: HeaderProps) {
             <User size={20} className="text-gray-700 hidden sm:block" />
           </div>
 
-          <span className="hidden sm:inline text-sm font-medium text-gray-700">
-            Admin
-          </span>
+          <h2 className="hidden sm:inline text-sm font-medium text-gray-700">
+            {userRole}
+          </h2>
 
           <ChevronDown size={16} className="text-gray-500" />
         </button>
