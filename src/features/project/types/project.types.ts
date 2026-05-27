@@ -37,6 +37,7 @@ export interface ProjectDocument {
 }
 
 export interface Project {
+  isSetupCompleted: boolean;
   id: string;
   name: string;
   description: string | null;
@@ -54,6 +55,7 @@ export interface Project {
   // ownerId: string;
   documents: ProjectDocument[];
   assignedUsers?: string[];
+  isEnabled?: boolean;
   members?: ProjectMember[];
   // createdAt: string;
   // updatedAt: string;

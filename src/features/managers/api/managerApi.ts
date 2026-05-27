@@ -90,7 +90,7 @@ export const createManager = async (
 
 export const updateManager = async (
   id: string,
-  payload: CreateManagerPayload
+  payload: Partial<CreateManagerPayload>
 ): Promise<Manager> => {
   const response = await api.put(
     `/managers/${id}`,

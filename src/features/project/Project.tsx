@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FiFolder,
-  FiTrash2,
+  FiToggleLeft,
+  FiToggleRight,
   FiEdit2,
   FiEye,
   FiSearch,
@@ -13,7 +14,7 @@ import plusIcon from "../../assets/plus icon.png";
 
 import StatusBadge from "./StatusBadge";
 import type { Project } from "./types/project.types";
-import { deleteProject, listProjects } from "./api/projectApi";
+import { listProjects, updateProject } from "./api/projectApi";
 import Pagination from "../../components/common/Pagination";
 
 function Projects() {
@@ -23,6 +24,7 @@ function Projects() {
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(5);
   const [total, setTotal] = useState<number>(0);
+  const [search, setSearch] = useState<string>("");
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const navigate = useNavigate();
@@ -41,11 +43,14 @@ function Projects() {
 
   // const userRole = user.role;
 
-  const fetchProjects = async (requestedPage = page) => {
+  const fetchProjects = async (
+    requestedPage = page,
+    searchTerm = search,
+  ) => {
     try {
       setLoading(true);
 
-      const data = await listProjects(requestedPage, limit);
+      const data = await listProjects(requestedPage, limit, undefined, searchTerm);
       console.log("Fetched projects:", data);
 
       setItems(data.projects);
@@ -58,14 +63,31 @@ function Projects() {
   };
 
   useEffect(() => {
-    fetchProjects();
+    fetchProjects(1, search);
   }, []);
 
-  const handleDelete = async (id: string) => {
-    await deleteProject(id);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setPage(1);
+      fetchProjects(1, search);
+    }, 400);
 
-    // refresh current page after deletion
-    await fetchProjects();
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const handleToggle = async (project: Project) => {
+    try {
+      await updateProject(project.id, { isEnabled: !project.isEnabled }, [], undefined);
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === project.id
+            ? { ...item, isEnabled: !item.isEnabled }
+            : item,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to toggle project state:", error);
+    }
   };
 
   return (
@@ -98,6 +120,8 @@ function Projects() {
               type="text"
               placeholder="Search"
               className="h-[40px] sm:h-[45px] w-full sm:w-80 rounded-lg border border-[#DCDCDC] bg-white py-3 pl-9 pr-4 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
@@ -221,7 +245,7 @@ function Projects() {
                       >
                         <FiEye size={16} />
 
-                        
+
                       </button>
                       <button
                         onClick={() =>
@@ -232,16 +256,22 @@ function Projects() {
                         className="relative flex h-[32px] w-[32px] items-center justify-center rounded-[8px] gap-2 p-2 bg-[#EEF4FF] text-[#0059FF] hover:bg-[#dde9ff]"
                       >
                         <FiEdit2 size={16} />
-                        {/* Red Dot */}
-                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                        {userRole !== "ADMIN" && !p.isSetupCompleted && (
+                          <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                        )}
                       </button>
-                      
+
 
                       <button
-                        onClick={() => handleDelete(p.id)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FFECED] text-[#AF232A] hover:bg-[#ffe0e1]"
+                        onClick={() => handleToggle(p)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${p.isEnabled ? "bg-[#E8F5E9] text-[#2370ff] hover:bg-[#d7efd7]" : "bg-[#F5F5F5] text-[#6B7280] hover:bg-[#e5e7eb]"}`}
+                        title={p.isEnabled ? "Disable project" : "Enable project"}
                       >
-                        <FiTrash2 size={16} />
+                        {p.isEnabled ? (
+                          <FiToggleRight size={18} />
+                        ) : (
+                          <FiToggleLeft size={18} />
+                        )}
                       </button>
                     </div>
                   </td>

@@ -31,6 +31,9 @@ function AddManager() {
     },
   });
 
+  const getInputClassName = (hasError?: boolean) =>
+    `w-full min-w-0 rounded-xl border px-4 py-3 outline-none ${hasError ? "border-red-500 focus:border-red-500" : "border-slate-300 focus:border-blue-500"}`;
+
   const password = watch("password");
 
   const preventCopyPaste = (
@@ -68,7 +71,7 @@ function AddManager() {
       console.error(error);
       showErrorToast(
         error?.response?.data?.message ||
-          "Failed to create manager. Please try again.",
+        "Failed to create manager. Please try again.",
       );
     }
   };
@@ -121,11 +124,11 @@ function AddManager() {
                     message: "Full name must be at least 2 characters",
                   },
                 })}
-                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className={getInputClassName(!!errors.name)}
                 placeholder="John Doe"
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.name.message}
                 </p>
               )}
@@ -145,11 +148,11 @@ function AddManager() {
                     message: "Enter a valid email address",
                   },
                 })}
-                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className={getInputClassName(!!errors.email)}
                 placeholder="manager@example.com"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.email.message}
                 </p>
               )}
@@ -163,16 +166,17 @@ function AddManager() {
               <input
                 {...register("empId", {
                   required: "Employee ID is required",
-                  minLength: {
-                    value: 2,
-                    message: "Employee ID must be at least 2 characters",
+                  pattern: {
+                    value: /^PIS\d{5}$/,
+                    message: "Employee ID must be like PIS10000",
                   },
                 })}
-                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
-                placeholder="EMP001"
+                maxLength={8}
+                className={getInputClassName(!!errors.empId)}
+                placeholder="PIS1001"
               />
               {errors.empId && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.empId.message}
                 </p>
               )}
@@ -185,7 +189,7 @@ function AddManager() {
               </label>
               <input
                 {...register("designation")}
-                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className={getInputClassName(!!errors.designation)}
                 placeholder="Project Manager"
               />
             </div>
@@ -222,9 +226,12 @@ function AddManager() {
                           ...base,
                           width: "100%",
                           borderRadius: "0.75rem",
-                          borderColor: "#cbd5e1",
-                          minHeight: "3rem",
-                          boxShadow: "none",
+                            borderColor: errors.role ? "#ef4444" : "#cbd5e1",
+                            minHeight: "3rem",
+                            boxShadow: "none",
+                            "&:hover": {
+                              borderColor: errors.role ? "#ef4444" : "#cbd5e1",
+                            },
                         }),
                         menu: (base) => ({
                           ...base,
@@ -236,7 +243,7 @@ function AddManager() {
                 }}
               />
               {errors.role && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.role.message}
                 </p>
               )}
@@ -256,11 +263,11 @@ function AddManager() {
                     message: "Enter a valid mobile number",
                   },
                 })}
-                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className={getInputClassName(!!errors.mobileNumber)}
                 placeholder="9876543210"
               />
               {errors.mobileNumber && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.mobileNumber.message}
                 </p>
               )}
@@ -285,11 +292,11 @@ function AddManager() {
                 onPaste={preventCopyPaste}
                 onCut={preventCopyPaste}
                 onKeyDown={preventCopyPaste}
-                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className={getInputClassName(!!errors.password)}
                 placeholder="Enter password"
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.password.message}
                 </p>
               )}
@@ -312,11 +319,11 @@ function AddManager() {
                 onPaste={preventCopyPaste}
                 onCut={preventCopyPaste}
                 onKeyDown={preventCopyPaste}
-                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className={getInputClassName(!!errors.confirmPassword)}
                 placeholder="Re-enter password"
               />
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.confirmPassword.message}
                 </p>
               )}

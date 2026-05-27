@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import Select from "react-select";
 
 import { createProject, updateProject } from "./api/projectApi";
 import api from "../../api/axios";
@@ -11,6 +12,7 @@ import {
   FiUser,
   FiX,
   FiEye,
+  FiArrowLeft,
 } from "react-icons/fi";
 import Breadcrumb from "../../components/common/Breadcrumb";
 import type {
@@ -20,6 +22,7 @@ import type {
   ProjectPriority,
   ProjectStatus,
 } from "./types/project.types";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   project?: Project | null;
@@ -52,7 +55,11 @@ export default function ProjectFormInline({
 }: Props) {
   const isEditing = !!project || !!isEditMode;
   const isViewOnly = !!isViewMode;
-  const pageTitle = isViewOnly ? "View Project" : isEditing ? "Edit Project" : "Add Project";
+  const pageTitle = isViewOnly
+    ? "View Project"
+    : isEditing
+      ? "Edit Project"
+      : "Add Project";
   const [previewDocument, setPreviewDocument] =
     useState<ProjectDocument | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -66,6 +73,7 @@ export default function ProjectFormInline({
     }
   })();
   const userRole = String(currentUser?.role || "").toUpperCase();
+  const isAdmin = userRole === "ADMIN";
 
   const getDocumentUrl = (doc: ProjectDocument) => {
     const docBaseUrl = import.meta.env.VITE_DOC_VIEW_URL?.replace(/\/$/, "");
@@ -171,7 +179,6 @@ export default function ProjectFormInline({
   const [developerError, setDeveloperError] = useState("");
   const [documentError, setDocumentError] = useState("");
 
-  const [isAssignedOpen, setIsAssignedOpen] = useState(false);
   const [assignedTo, setAssignedTo] = useState<string[]>([]); // store selected user IDs
   const [assignedOptions, setAssignedOptions] = useState<
     {
@@ -180,6 +187,7 @@ export default function ProjectFormInline({
       email?: string;
     }[]
   >([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAssignableUsers = async () => {
@@ -201,34 +209,34 @@ export default function ProjectFormInline({
     fetchAssignableUsers();
   }, []);
 
-  const handleAssignedChange = (value: string) => {
-    setAssignedTo((prev) =>
-      prev.includes(value)
-        ? prev.filter((item) => item !== value)
-        : [...prev, value],
-    );
-  };
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setError,
     clearErrors,
-    formState: { errors },
+    setValue,
+    trigger,
+    formState: { errors, isSubmitted },
   } = useForm<CreateProjectPayload>({
     defaultValues: {
       name: "",
       description: "",
-      status: "PLANNING",
-      priority: "MEDIUM",
+      status: "",
+      priority: "",
       clientName: "",
       startDate: "",
       endDate: "",
+      assignedTo: [],
       devUrl: "",
       uatUrl: "",
       prodUrl: "",
-    },
+    } as any,
   });
+
+  const getInputClassName = (hasError?: boolean) =>
+    `w-full rounded-xl border px-4 py-3 outline-none ${hasError ? "border-red-500 focus:border-red-500" : "border-slate-300 focus:border-blue-500"}`;
 
   const copyToClipboard = async (value: string) => {
     if (!value) return;
@@ -243,13 +251,25 @@ export default function ProjectFormInline({
   useEffect(() => {
     const normalizeDoc = (d: any) => {
       const urlStr = d?.url || d?.path || d?.fileUrl || d?.link || "";
-      const inferredFilename = d?.filename || d?.fileName || d?.name || (typeof urlStr === "string" ? urlStr.split("/").pop() : "") || "";
+      const inferredFilename =
+        d?.filename ||
+        d?.fileName ||
+        d?.name ||
+        (typeof urlStr === "string" ? urlStr.split("/").pop() : "") ||
+        "";
 
       return {
         id: d?.id || d?._id || d?.documentId || crypto.randomUUID(),
         projectId: d?.projectId || d?.project_id || "",
         filename: inferredFilename,
-        originalName: d?.originalName || d?.name || d?.fileName || d?.filename || d?.originalname || d?.label || inferredFilename,
+        originalName:
+          d?.originalName ||
+          d?.name ||
+          d?.fileName ||
+          d?.filename ||
+          d?.originalname ||
+          d?.label ||
+          inferredFilename,
         mimeType: d?.mimeType || d?.mime_type || d?.type || "",
         size: d?.size || d?.length || d?.file?.size || 0,
         uploadedAt: d?.uploadedAt || d?.createdAt || d?.created_at || "",
@@ -274,7 +294,7 @@ export default function ProjectFormInline({
 
       setDevelopers(project.developers || []);
       const rawDocs = project.documents ?? [];
-      setDocuments((Array.isArray(rawDocs) ? rawDocs.map(normalizeDoc) : []));
+      setDocuments(Array.isArray(rawDocs) ? rawDocs.map(normalizeDoc) : []);
       // prefer explicit assignedUsers array if provided by backend
       if (
         Array.isArray((project as any).assignedUsers) &&
@@ -299,6 +319,11 @@ export default function ProjectFormInline({
       setAssignedTo([]);
     }
   }, [project, reset]);
+
+  // keep form value in sync with assignedTo state
+  useEffect(() => {
+    setValue("assignedTo" as any, assignedTo);
+  }, [assignedTo, setValue]);
 
   const validateUrl = (value: any) => {
     if (!value || typeof value !== "string") return true;
@@ -365,24 +390,37 @@ export default function ProjectFormInline({
     setDeveloperError("");
     setDocumentError("");
 
-    if (developers.length === 0) {
-      const message = "At least one developer is required";
-      setError("developers", { type: "required", message });
-      setDeveloperError(message);
-      return;
-    }
+    if (isAdmin) {
+      // Admin: require Assigned To
+      if (assignedTo.length === 0) {
+        const message = "Assigned To is required";
+        setError("assignedTo" as any, { type: "required", message });
+        return;
+      } else {
+        clearErrors("assignedTo" as any);
+      }
+    } else {
+      // Non-admin: require developers and documents and other required fields handled by react-hook-form
+      if (developers.length === 0) {
+        const message = "At least one developer is required";
+        setError("developers" as any, { type: "required", message });
+        setDeveloperError(message);
+        return;
+      }
 
-    if (documents.length === 0) {
-      const message = "At least one document is required";
-      setError("documents", { type: "required", message });
-      setDocumentError(message);
-      return;
+      if (documents.length === 0) {
+        const message = "At least one document is required";
+        setError("documents" as any, { type: "required", message });
+        setDocumentError(message);
+        return;
+      }
     }
 
     try {
       setSaving(true);
 
-      const payload: CreateProjectPayload = { ...data, developers };
+      const { assignedTo: _assignedTo, ...projectData } = data as any;
+      const payload: CreateProjectPayload = { ...projectData, developers };
 
       if (!isEditing) {
         await createProject(
@@ -419,12 +457,29 @@ export default function ProjectFormInline({
   return (
     <div className="">
       <div className=" ">
-        <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/projects", label: "Projects" }, { label: pageTitle }]} />
+        <Breadcrumb
+          items={[
+            { to: "/", label: "Home" },
+            { to: "/projects", label: "Projects" },
+            { label: pageTitle },
+          ]}
+        />
 
-        <h2 className="text-[20px] font-semibold leading-[100%] tracking-[0%] text-[#00076F] font-[Poppins] mb-4">
-          {pageTitle}
-        </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 ">
+          <h1 className="mt-5 font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-[0px] text-[#00076F]">
+            {pageTitle}
+          </h1>
+
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 px-4 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
+          >
+            <FiArrowLeft />
+            <span>Back</span>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-6">
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -434,15 +489,13 @@ export default function ProjectFormInline({
                 </span>
               </label>
               <input
-                {...register("name", { required: true })}
+                {...register("name", { required: "Project name is required" })}
                 disabled={isViewOnly}
                 placeholder="Enter Project Name"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500
-             placeholder:font-[Poppins] placeholder:font-medium placeholder:text-[14px]
-             placeholder:leading-[100%] placeholder:tracking-normal placeholder:text-[#7A7A7A]"
+                className={`${getInputClassName(!!errors.name)} placeholder:font-[Poppins] placeholder:font-medium placeholder:text-[14px] placeholder:leading-[100%] placeholder:tracking-normal placeholder:text-[#7A7A7A]`}
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.name.message || "Project name is required"}
                 </p>
               )}
@@ -450,93 +503,88 @@ export default function ProjectFormInline({
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Description&nbsp;{userRole != "ADMIN" && (<span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
+                Description&nbsp;
+                {userRole != "ADMIN" && (<span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
                   *
                 </span>)}
               </label>
               <textarea
                 rows={3}
-                {...register("description", {
-                  required: "Description is required",
-                })}
+                {...register("description", isAdmin ? {} : { required: "Description is required" })}
                 disabled={isViewOnly}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className={getInputClassName(!!errors.description)}
               />
               {errors.description && (
-                <p className="mt-1 text-sm text-red-500">
+                <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.description.message}
                 </p>
               )}
-              {userRole == "ADMIN" && (<div className="relative">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Assigned To&nbsp;
-                  <span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
-                    *
-                  </span>
-                </label>
+              {userRole == "ADMIN" && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Assigned To&nbsp;
+                    <span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
+                      *
+                    </span>
+                  </label>
 
-                {/* Selected Cards */}
-                {assignedTo.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {assignedTo.map((userId) => {
-                      const u = assignedOptions.find((a) => a.id === userId);
+                  <Controller
+                    name={"assignedTo" as any}
+                    control={control}
+                    rules={{
+                      validate: (value) =>
+                        Array.isArray(value) && value.length > 0
+                          ? true
+                          : "Assigned To is required",
+                    }}
+                    render={({ field }) => {
+                      const selectOptions = assignedOptions.map((option) => ({
+                        value: option.id,
+                        label: option.name,
+                      }));
+
                       return (
-                        <div
-                          key={userId}
-                          className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
-                        >
-                          {u?.name || userId}
-                          {!isViewOnly && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAssignedChange(userId);
-                              }}
-                              className="ml-1"
-                            >
-                              <FiX size={14} />
-                            </button>
+                        <Select<{ value: string; label: string }, true>
+                          {...field}
+                          isMulti
+                          isDisabled={isViewOnly}
+                          closeMenuOnSelect={false}
+                          options={selectOptions}
+                          value={selectOptions.filter((opt) =>
+                            Array.isArray(field.value) ? field.value.includes(opt.value) : false,
                           )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Dropdown Button */}
-                <div
-                  onClick={() =>
-                    !isViewOnly && setIsAssignedOpen(!isAssignedOpen)
-                  }
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 cursor-pointer bg-white"
-                >
-                  {assignedTo.length > 0
-                    ? `${assignedTo.length} selected`
-                    : "Select Assigned To"}
-                </div>
-
-                {/* Dropdown Options */}
-                {isAssignedOpen && (
-                  <div className="absolute mt-2 w-full bg-white border border-slate-300 rounded-xl shadow-lg z-10 p-3">
-                    {assignedOptions.map((option) => (
-                      <label
-                        key={option.id}
-                        className="flex items-center gap-2 py-2"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={assignedTo.includes(option.id)}
-                          onChange={() => handleAssignedChange(option.id)}
-                          disabled={isViewOnly}
+                          onChange={(selected) => {
+                            const values = Array.isArray(selected) ? selected.map((item) => item.value) : [];
+                            field.onChange(values);
+                            setAssignedTo(values);
+                          }}
+                          styles={{
+                            control: (base) => ({
+                              ...base,
+                              width: "100%",
+                              borderRadius: "0.75rem",
+                              borderColor: (errors as any).assignedTo ? "#ef4444" : "#cbd5e1",
+                              minHeight: "3rem",
+                              boxShadow: "none",
+                              "&:hover": {
+                                borderColor: (errors as any).assignedTo ? "#ef4444" : "#cbd5e1",
+                              },
+                            }),
+                            menu: (base) => ({
+                              ...base,
+                              borderRadius: "0.75rem",
+                            }),
+                          }}
+                          placeholder="Select Assigned To"
                         />
-                        {option.name}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>)}
-
+                      );
+                    }}
+                  />
+                  {(errors as any).assignedTo && (
+                    <p className="mt-1 text-sm text-red-500 text-[12px]">{(errors as any).assignedTo?.message}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -547,17 +595,39 @@ export default function ProjectFormInline({
                     *
                   </span>)}
                 </label>
-                <select
-                  {...register("status")}
-                  disabled={isViewOnly}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
-                >
-                  {statuses.map((s) => (
-                    <option key={s.value} value={s.value}>
-                      {s.label}
-                    </option>
-                  ))}
-                </select>
+                <Controller
+                  name={"status" as any}
+                  control={control}
+                  rules={isAdmin ? {} : { required: "Status is required" }}
+                  render={({ field }) => (
+                    <Select<{ value: ProjectStatus; label: string }, false>
+                      {...field}
+                      isDisabled={isViewOnly}
+                      options={statuses.map((s) => ({ value: s.value, label: s.label }))}
+                      value={
+                        statuses
+                          .map((s) => ({ value: s.value, label: s.label }))
+                          .find((opt) => opt.value === field.value) ?? null
+                      }
+                      onChange={(opt) => field.onChange(opt ? opt.value : "")}
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          width: "100%",
+                          borderRadius: "0.75rem",
+                          borderColor: (errors as any).status ? "#ef4444" : "#cbd5e1",
+                          minHeight: "3rem",
+                          boxShadow: "none",
+                          "&:hover": {
+                            borderColor: (errors as any).status ? "#ef4444" : "#cbd5e1",
+                          },
+                        }),
+                        menu: (base) => ({ ...base, borderRadius: "0.75rem" }),
+                      }}
+                      placeholder="Select status"
+                    />
+                  )}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -566,35 +636,60 @@ export default function ProjectFormInline({
                     *
                   </span>
                 </label>
-                <select
-                  {...register("priority")}
-                  disabled={isViewOnly}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
-                >
-                  {priorities.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+                <Controller
+                  name={"priority" as any}
+                  control={control}
+                  rules={{ required: "Priority is required" }}
+                  render={({ field }) => (
+                    <Select<{ value: ProjectPriority; label: string }, false>
+                      {...field}
+                      isDisabled={isViewOnly}
+                      options={priorities.map((p) => ({ value: p.value, label: p.label }))}
+                      value={
+                        priorities
+                          .map((p) => ({ value: p.value, label: p.label }))
+                          .find((opt) => opt.value === field.value) ?? null
+                      }
+                      onChange={(opt) => field.onChange(opt ? opt.value : "")}
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          width: "100%",
+                          borderRadius: "0.75rem",
+                          borderColor: (errors as any).priority ? "#ef4444" : "#cbd5e1",
+                          minHeight: "3rem",
+                          boxShadow: "none",
+                          "&:hover": {
+                            borderColor: (errors as any).priority ? "#ef4444" : "#cbd5e1",
+                          },
+                        }),
+                        menu: (base) => ({ ...base, borderRadius: "0.75rem" }),
+                      }}
+                      placeholder="Select priority"
+                    />
+                  )}
+                />
+                {errors.priority && (
+                  <p className="mt-1 text-sm text-red-500 text-[12px]">
+                    {errors.priority.message}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Client Name&nbsp;
                   {userRole != "ADMIN" && (<span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
-                  *
-                </span>)}
+                    *
+                  </span>)}
                 </label>
                 <input
-                  {...register("clientName", {
-                    required: "Client name is required",
-                  })}
+                  {...register("clientName", isAdmin ? {} : { required: "Client name is required" })}
                   disabled={isViewOnly}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                  className={getInputClassName(!!errors.clientName)}
                   placeholder="Optional"
                 />
                 {errors.clientName && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-red-500 text-[12px]">
                     {errors.clientName.message}
                   </p>
                 )}
@@ -608,14 +703,12 @@ export default function ProjectFormInline({
                 </label>
                 <input
                   type="date"
-                  {...register("startDate", {
-                    required: "Start date is required",
-                  })}
+                  {...register("startDate", { required: "Start date is required" })}
                   disabled={isViewOnly}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                  className={getInputClassName(!!errors.startDate)}
                 />
                 {errors.startDate && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-red-500 text-[12px]">
                     {errors.startDate.message}
                   </p>
                 )}
@@ -624,17 +717,17 @@ export default function ProjectFormInline({
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   End Date&nbsp;
                   {userRole != "ADMIN" && (<span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
-                  *
-                </span>)}
+                    *
+                  </span>)}
                 </label>
                 <input
                   type="date"
-                  {...register("endDate", { required: "End date is required" })}
+                  {...register("endDate", isAdmin ? {} : { required: "End date is required" })}
                   disabled={isViewOnly}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                  className={getInputClassName(!!errors.endDate)}
                 />
                 {errors.endDate && (
-                  <p className="mt-1 text-sm text-red-500">
+                  <p className="mt-1 text-sm text-red-500 text-[12px]">
                     {errors.endDate.message}
                   </p>
                 )}
@@ -646,8 +739,8 @@ export default function ProjectFormInline({
             <label className="block font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-2">
               Environment Links&nbsp;
               {userRole != "ADMIN" && (<span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
-                  *
-                </span>)}
+                *
+              </span>)}
             </label>
 
             <div className="space-y-4">
@@ -681,13 +774,14 @@ export default function ProjectFormInline({
                       </div>
 
                       <input
-                        {...register(env.name as keyof CreateProjectPayload, {
+                        {...register(env.name as keyof CreateProjectPayload, isAdmin ? {
+                          validate: (value) => !value || validateUrl(value) || "Invalid URL",
+                        } : {
                           required: `${env.label} URL is required`,
-                          validate: (value) =>
-                            validateUrl(value) || "Invalid URL",
+                          validate: (value) => validateUrl(value) || "Invalid URL",
                         })}
                         disabled={isViewOnly}
-                        className="w-full rounded-xl px-4 py-3 outline-none focus:outline-none font-[Poppins] placeholder:text-[#7A7A7A] placeholder:font-medium placeholder:text-[14px] placeholder:leading-[100%] placeholder:tracking-normal"
+                        className={`${getInputClassName(!!errors[env.name as keyof CreateProjectPayload])} font-[Poppins] placeholder:text-[#7A7A7A] placeholder:font-medium placeholder:text-[14px] placeholder:leading-[100%] placeholder:tracking-normal`}
                         placeholder={
                           env.label === "DEV"
                             ? "Enter Dev URL"
@@ -699,11 +793,8 @@ export default function ProjectFormInline({
                         }
                       />
                       {errors[env.name as keyof CreateProjectPayload] && (
-                        <p className="sm:col-span-3 mt-1 text-sm text-red-500">
-                          {
-                            errors[env.name as keyof CreateProjectPayload]
-                              ?.message
-                          }
+                        <p className="sm:col-span-3 mt-1 text-sm text-red-500 text-[12px]">
+                          {errors[env.name as keyof CreateProjectPayload]?.message}
                         </p>
                       )}
                     </div>
@@ -715,11 +806,9 @@ export default function ProjectFormInline({
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white  rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <label className="block font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-2">
               Developers&nbsp;
-              {userRole != "ADMIN" && (
-                <span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
-                  *
-                </span>
-              )}
+              {userRole != "ADMIN" && (<span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
+                *
+              </span>)}
             </label>
             <div className="flex gap-2">
               <input
@@ -727,16 +816,16 @@ export default function ProjectFormInline({
                 onChange={(e) => setDeveloperInput(e.target.value)}
                 onKeyDown={handleDeveloperKeyDown}
                 disabled={isViewOnly}
-                className="flex-1 rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-blue-500"
+                className={`flex-1 ${getInputClassName(!!(errors.developers || developerError)).replace(/^w-full /, "")} `}
                 placeholder="Type name and press Enter"
               />
               {!isViewOnly && (
                 <button
                   type="button"
                   onClick={addDeveloper}
-                  className="rounded-xl border border-[#0059FF] bg-white px-4 py-2
-             font-[Poppins] font-medium text-[14px]
-             leading-[100%] tracking-normal text-center align-middle
+                  className="rounded-xl border border-[#0059FF] bg-white px-4 py-2 
+             font-[Poppins] font-medium text-[14px] 
+             leading-[100%] tracking-normal text-center align-middle 
              text-[#0059FF] hover:bg-blue-50 transition"
                 >
                   Add
@@ -765,7 +854,7 @@ export default function ProjectFormInline({
               ))}
             </div>
             {(errors.developers || developerError) && (
-              <p className="mt-2 text-sm text-red-500">
+              <p className="mt-2 text-sm text-red-500 text-[12px]">
                 {developerError || errors.developers?.message}
               </p>
             )}
@@ -773,7 +862,10 @@ export default function ProjectFormInline({
 
           <div className="card p-5 space-y-4 md:col-span-2 xl:col-span-3 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <label className="block font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-2">
-              Documents
+              Documents&nbsp;
+              {userRole != "ADMIN" && (<span className="text-[#E72027] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-normal">
+                *
+              </span>)}
             </label>
 
             {/* 2 Column Layout */}
@@ -889,9 +981,9 @@ export default function ProjectFormInline({
             {/* Cancel Button */}
             <button
               type="button"
-              className="w-24.75 h-11.25 px-6 py-3 rounded-lg border border-[#7A7A7A]
-                 bg-white font-[Poppins] font-medium text-[14px]
-                 leading-[100%] tracking-normal text-center align-middle
+              className="w-24.75 h-11.25 px-6 py-3 rounded-lg border border-[#7A7A7A] 
+                 bg-white font-[Poppins] font-medium text-[14px] 
+                 leading-[100%] tracking-normal text-center align-middle 
                  text-[#7A7A7A] hover:bg-gray-50 transition"
             >
               Cancel
@@ -900,19 +992,19 @@ export default function ProjectFormInline({
             {/* Save Details Button */}
             <button
               type="submit"
-              className=" h-11.25 px-6 py-3 rounded-lg
-                 bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)]
-                 font-[Poppins] font-medium text-[14px]
-                 leading-[100%] tracking-normal text-center align-middle
-                 text-white
-                 shadow-[0px_2px_6px_rgba(0,0,0,0.15)]
+              className=" h-11.25 px-6 py-3 rounded-lg 
+                 bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] 
+                 font-[Poppins] font-medium text-[14px] 
+                 leading-[100%] tracking-normal text-center align-middle 
+                 text-white 
+                 shadow-[0px_2px_6px_rgba(0,0,0,0.15)] 
                  hover:opacity-90 transition"
               style={{
                 borderImage:
                   "linear-gradient(90deg, #6B9FFF 0%, #0059FF 100%) 1",
               }}
             >
-              {saving ? "Saving..." : "Save Details"}
+              Save Details
             </button>
           </div>
         </form>
@@ -927,7 +1019,13 @@ export default function ProjectFormInline({
                   Document Preview
                 </h2>
                 <p className="mt-1 text-sm text-slate-500 truncate">
-                  {previewDocument?.originalName || (previewDocument as any)?.name || previewDocument?.filename || previewDocument?.file?.name || (previewDocument?.url ? String(previewDocument.url).split("/").pop() : "Untitled")}
+                  {previewDocument?.originalName ||
+                    (previewDocument as any)?.name ||
+                    previewDocument?.filename ||
+                    previewDocument?.file?.name ||
+                    (previewDocument?.url
+                      ? String(previewDocument.url).split("/").pop()
+                      : "Untitled")}
                 </p>
               </div>
               <button
@@ -944,7 +1042,13 @@ export default function ProjectFormInline({
                 </div>
               ) : previewUrl ? (
                 <iframe
-                  title={previewDocument?.originalName || (previewDocument as any)?.name || previewDocument?.filename || previewDocument?.file?.name || "document-preview"}
+                  title={
+                    previewDocument?.originalName ||
+                    (previewDocument as any)?.name ||
+                    previewDocument?.filename ||
+                    previewDocument?.file?.name ||
+                    "document-preview"
+                  }
                   src={previewUrl}
                   className="h-full w-full rounded-b-2xl"
                 />

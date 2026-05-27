@@ -10,6 +10,7 @@ export interface Manager {
   empId: string;
   designation: string;
   mobileNumber?: string;
+  isEnabled?: boolean;
   // createdAt?: string;
 }
 
@@ -22,5 +23,6 @@ export interface CreateManagerPayload {
   mobileNumber?: string;
   password?: string;
   confirmPassword?: string;
+  isEnabled?: boolean;
 //   status: ManagerStatus;
 }

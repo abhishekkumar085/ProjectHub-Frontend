@@ -11,6 +11,7 @@ import {
   FiFileText,
   FiLink,
   FiChevronDown,
+  FiExternalLink,
 } from "react-icons/fi";
 
 import type { Project } from "../project/types/project.types";
@@ -86,7 +87,7 @@ function ViewDetails() {
         </div>
       </div>
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mt-2 mb-3">
-        <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
+        <h2 className="text-lg sm:text-xl font-semibold text-[#00076F]">
           User Details
         </h2>
         <button
@@ -108,7 +109,7 @@ function ViewDetails() {
       ) : (
         <div className="space-y-6 mt-3">
           {/* Manager Card */}
-          <section className="rounded-[24px] bg-[#0059FF] px-6 py-5 text-white shadow-lg">
+          <section className="rounded-3xl bg-[#0059FF] px-6 py-5 text-white shadow-lg bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)] before:bg-white">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               {/* User Info */}
               <div className="flex items-center gap-4">
@@ -162,7 +163,7 @@ function ViewDetails() {
           <section className="">
             {projects.length === 0 ? (
               <div className="mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-slate-500">
-                No projects found for this manager.
+                No projects found for this user.
               </div>
             ) : (
               <div className="mt-6 space-y-4">
@@ -196,7 +197,7 @@ function ViewDetails() {
                       <div className="grid grid-cols-1 gap-y-6 gap-x-10 md:grid-cols-2 xl:grid-cols-3">
                         {/* Client */}
                         <div className="flex items-start gap-4">
-                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                          <div className="flex h-9.5 w-9.5 items-center justify-center rounded-[10px] bg-[#EEF4FF]">
                             <FiUser className="text-[18px] text-[#0059FF]" />
                           </div>
 
@@ -205,7 +206,7 @@ function ViewDetails() {
                               Client
                             </p>
 
-                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                            <p className="mt-0.5 font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
                               {project.clientName || "—"}
                             </p>
                           </div>
@@ -213,7 +214,7 @@ function ViewDetails() {
 
                         {/* Start Date */}
                         <div className="flex items-start gap-4">
-                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                          <div className="flex h-9.5 w-9.5 items-center justify-center rounded-[10px] bg-[#EEF4FF]">
                             <FiCalendar className="text-[18px] text-[#0059FF]" />
                           </div>
 
@@ -222,7 +223,7 @@ function ViewDetails() {
                               Start Date
                             </p>
 
-                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                            <p className="mt-0.5 font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
                               {formatDate(project.startDate)}
                             </p>
                           </div>
@@ -230,7 +231,7 @@ function ViewDetails() {
 
                         {/* End Date */}
                         <div className="flex items-start gap-4">
-                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                          <div className="flex h-9.5 w-9.5 items-center justify-center rounded-[10px] bg-[#EEF4FF]">
                             <FiCalendar className="text-[18px] text-[#0059FF]" />
                           </div>
 
@@ -247,7 +248,7 @@ function ViewDetails() {
 
                         {/* Developers */}
                         <div className="flex items-start gap-4">
-                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                          <div className="flex h-9.5 w-9.5 items-center justify-center rounded-[10px] bg-[#EEF4FF]">
                             <FiUsers className="text-[18px] text-[#0059FF]" />
                           </div>
 
@@ -256,7 +257,7 @@ function ViewDetails() {
                               Developers
                             </p>
 
-                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                            <p className="mt-0.5 font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
                               {project.developers?.join(", ") || "—"}
                             </p>
                           </div>
@@ -264,7 +265,7 @@ function ViewDetails() {
 
                         {/* Documents */}
                         <div className="flex items-start gap-4">
-                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                          <div className="flex h-9.5 w-9.5 items-center justify-center rounded-[10px] bg-[#EEF4FF]">
                             <FiFileText className="text-[18px] text-[#0059FF]" />
                           </div>
 
@@ -273,7 +274,7 @@ function ViewDetails() {
                               Documents
                             </p>
 
-                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                            <p className="mt-0.5 font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
                               {project.documents?.length ?? 0}
                             </p>
                           </div>
@@ -281,7 +282,7 @@ function ViewDetails() {
 
                         {/* URLs */}
                         <div className="flex items-start gap-4">
-                          <div className="flex h-[38px] w-[38px] items-center justify-center rounded-[10px] bg-[#EEF4FF]">
+                          <div className="flex h-9.5 w-9.5 items-center justify-center rounded-[10px] bg-[#EEF4FF]">
                             <FiLink className="text-[18px] text-[#0059FF]" />
                           </div>
 
@@ -289,19 +290,37 @@ function ViewDetails() {
                             <p className="font-[Poppins] font-medium text-[12px] leading-[100%] tracking-[0%] uppercase text-[#7A7A7A]">
                               URL
                             </p>
-
-                            <div className="mt-[2px] space-y-[2px]">
-                              <p className="font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616] break-all">
-                                {project.devUrl || "—"}
-                              </p>
-
-                              <p className="font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616] break-all">
-                                {project.uatUrl || "—"}
-                              </p>
-
-                              <p className="font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616] break-all">
-                                {project.prodUrl || "—"}
-                              </p>
+                            <div className="flex items-center gap-2 flex-wrap mt-1">
+                              {project.devUrl && (
+                                <a
+                                  href={project.devUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 rounded bg-[#EEF4FF] px-2 py-1 text-xs font-medium text-[#0059FF]"
+                                >
+                                  DEV <FiExternalLink size={10} />
+                                </a>
+                              )}
+                              {project.uatUrl && (
+                                <a
+                                  href={project.uatUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 rounded bg-[#FFF4E5] px-2 py-1 text-xs font-medium text-[#B76E00]"
+                                >
+                                  UAT <FiExternalLink size={10} />
+                                </a>
+                              )}
+                              {project.prodUrl && (
+                                <a
+                                  href={project.prodUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 rounded bg-[#E8F5E9] px-2 py-1 text-xs font-medium text-[#2E7D32]"
+                                >
+                                  PROD <FiExternalLink size={10} />
+                                </a>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -318,31 +337,5 @@ function ViewDetails() {
   );
 }
 
-/* Reusable Info Card */
-function InfoCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50">
-        {icon}
-      </div>
-
-      <div>
-        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-          {label}
-        </p>
-
-        <p className="mt-1 text-sm font-medium text-slate-900">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 export default ViewDetails;

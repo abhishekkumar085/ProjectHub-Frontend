@@ -25,12 +25,17 @@ export type ListProjectsForUserResult = ListProjectsResult & {
 export const listProjects = async (
   page = 1,
   limit = 10,
-  managerId?: string
+  managerId?: string,
+  search?: string,
 ): Promise<ListProjectsResult> => {
   const queryParts = [`page=${page}`, `limit=${limit}`];
 
   if (managerId) {
     queryParts.push(`managerId=${managerId}`);
+  }
+
+  if (search && search.trim()) {
+    queryParts.push(`search=${encodeURIComponent(search.trim())}`);
   }
 
   const res = await api.get(`/project/projects?${queryParts.join("&")}`);

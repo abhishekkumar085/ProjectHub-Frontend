@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  FiTrash2,
+  FiToggleLeft,
+  FiToggleRight,
   FiUsers,
   FiEye,
   FiSearch,
   FiChevronRight,
 } from "react-icons/fi";
 import plusIcon from "../../assets/plus icon.png";
-import { deleteManager, listManagers } from "./api/managerApi";
+import { listManagers, updateManager } from "./api/managerApi";
 import type { Manager } from "./types/manager.types";
 import Pagination from "../../components/common/Pagination";
 
@@ -40,11 +41,20 @@ function Managers() {
     fetchManagers();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    await deleteManager(id);
+  const handleToggle = async (manager: Manager) => {
+    try {
+      const updated = await updateManager(manager.id, {
+        isEnabled: !manager.isEnabled,
+      });
 
-    // refresh current page
-    await fetchManagers(page);
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === manager.id ? { ...item, isEnabled: updated.isEnabled } : item,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to toggle manager status:", error);
+    }
   };
 
   return (
@@ -61,7 +71,7 @@ function Managers() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold text-slate-900">Users</h2>
+          <h2 className="text-lg sm:text-xl font-semibold text-[#00076F]">Users</h2>
           <p className="text-sm text-slate-500">({total} results found)</p>
         </div>
 
@@ -180,10 +190,15 @@ function Managers() {
                       </button>
 
                       <button
-                        onClick={() => handleDelete(manager.id)}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#FFECED] text-[#AF232A] hover:bg-[#ffe0e1]"
+                        onClick={() => handleToggle(manager)}
+                        className={`flex h-8 w-8 items-center justify-center rounded-lg ${manager.isEnabled ? "bg-[#E8F5E9] text-[#2E7D32] hover:bg-[#d7efd7]" : "bg-[#F5F5F5] text-[#6B7280] hover:bg-[#e5e7eb]"}`}
+                        title={manager.isEnabled ? "Disable user" : "Enable user"}
                       >
-                        <FiTrash2 size={16} />
+                        {manager.isEnabled ? (
+                          <FiToggleRight size={18} />
+                        ) : (
+                          <FiToggleLeft size={18} />
+                        )}
                       </button>
                     </div>
                   </td>
