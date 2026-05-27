@@ -104,7 +104,7 @@ function Header({ collapsed, onToggle, onMobileOpen }: HeaderProps) {
               className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-gray-100"
             >
               <FiUser size={16} className="text-blue-600" />
-              Edit Profile
+              Profile
             </button>
 
             <button
