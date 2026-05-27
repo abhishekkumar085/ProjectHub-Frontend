@@ -10,6 +10,9 @@ import ViewProject from "../features/project/ViewProject";
 import Managers from "../features/managers/Managers";
 import AddManager from "../features/managers/AddManager";
 import ViewDetails from "../features/managers/ViewDetails";
+import Profile from "../features/dashboard/profile";
+import EditProfile from "../features/dashboard/EditProfile";
+import ChangePassword from "../features/dashboard/ChangePassword";
 
 function AppRoutes() {
   return (
@@ -35,6 +38,9 @@ function AppRoutes() {
         <Route path="managers" element={<Managers/>} />
         <Route path="managers/add" element={<AddManager/>} />
         <Route path="users/:id/projects" element={<ViewDetails/>} />
+        <Route path="profile" element={<Profile/>} />
+        <Route path="profile/edit" element={<EditProfile/>} />
+        <Route path="change-password" element={<ChangePassword/>} />
       </Route>
     </Routes>
   );

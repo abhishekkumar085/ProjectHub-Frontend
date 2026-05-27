@@ -5,7 +5,7 @@ import totalIcon from "../../assets/Total.png";
 import activeIcon from "../../assets/Active.png";
 import completedIcon from "../../assets/Completed.png";
 import { useEffect, useState } from "react";
-import { getDashboardApi } from "./dashboardapi";
+import { getDashboardApi } from "../dashboard/api/DashboardApi";
 import Highcharts from "highcharts";
 
 import { HighchartsReact } from "highcharts-react-official";
