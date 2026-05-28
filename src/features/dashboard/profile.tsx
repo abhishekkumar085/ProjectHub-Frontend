@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiEdit2, FiLock } from "react-icons/fi";
 import Breadcrumb from "../../components/common/Breadcrumb";
+import Loader from "../../components/common/Loader";
 import { showErrorToast } from "../../utils/toast";
 import { getProfile, readStoredUser } from "./api/profileApi";
 import type { ProfileUser } from "./api/profileApi";
@@ -90,9 +91,7 @@ function Profile() {
         </h2>
 
         {loadingProfile ? (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-            Loading profile details...
-          </div>
+          <Loader className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-5" />
         ) : (
           <div className="mt-3 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
             {profileFields.map((field) => (

@@ -46,14 +46,6 @@ function AddEditProjects() {
 		})();
 	}, [location]);
 
-	if (loading) {
-		return (
-			<div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 text-center">
-				<p className="text-sm text-slate-500">Loading project details…</p>
-			</div>
-		);
-	}
-
 	if (loadError) {
 		return (
 			<div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 text-center">
@@ -66,7 +58,7 @@ function AddEditProjects() {
 		<div className="space-y-6">
 			<div className="grid grid-cols-1 gap-6">
 				<div>
-					<ProjectFormInline project={selectedProject} isEditMode={isEditing} isViewMode={isViewing} onSaved={() => navigate("/projects")} />
+					<ProjectFormInline project={selectedProject} isEditMode={isEditing} isViewMode={isViewing} loading={loading} onSaved={() => navigate("/projects")} />
 				</div>
 			</div>
 		</div>

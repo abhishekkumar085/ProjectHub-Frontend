@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Folder,
   FileText,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { FiArrowLeft, FiX } from "react-icons/fi";
 import Breadcrumb from "../../components/common/Breadcrumb";
+import Loader from "../../components/common/Loader";
 import { getProjectById } from "./api/projectApi";
 import type { Project } from "./types/project.types";
 
@@ -148,14 +149,6 @@ function ViewProject() {
     fetchProject();
   }, [id]);
 
-  if (loading) {
-    return (
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 text-center">
-        <p className="text-sm text-slate-500">Loading project details...</p>
-      </div>
-    );
-  }
-
   if (loadError) {
     return (
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 text-center">
@@ -190,26 +183,26 @@ function ViewProject() {
     },
     ...(isAdmin
       ? [
-          {
-            icon: <Users size={20} className="text-blue-600" />,
-            label: "ASSIGNED TO",
-            value:
-              assignedToList.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {assignedToList.map((name) => (
-                    <span
-                      key={name}
-                      className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
-                    >
-                      {name}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                "-"
-              ),
-          },
-        ]
+        {
+          icon: <Users size={20} className="text-blue-600" />,
+          label: "ASSIGNED TO",
+          value:
+            assignedToList.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {assignedToList.map((name) => (
+                  <span
+                    key={name}
+                    className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+                  >
+                    {name}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              "-"
+            ),
+        },
+      ]
       : []),
     {
       icon: <Users size={20} className="text-blue-600" />,
@@ -292,171 +285,170 @@ function ViewProject() {
           <span>Back</span>
         </button>
       </div>
-      <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-3">
-          Basic Information
-        </h1>
 
-        <div className="space-y-6">
-          {projectData.map((item, index) => (
-            <div key={index} className="flex items-start gap-4">
-              <div className="w-12 h-12 min-w-[48px] flex items-center justify-center rounded-lg bg-[#EAF2FF]">
-                {item.icon}
-              </div>
+      {loading ? <Loader /> : (
+        <>
+          <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
+            <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-3">
+              Basic Information
+            </h1>
 
-              <div className="flex-1 space-y-2">
-                <p className="font-medium text-xs uppercase text-[#7A7A7A]">
-                  {item.label}
-                </p>
-
-                {typeof item.value === "string" ? (
-                  <p className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
-                    {item.value}
-                  </p>
-                ) : (
-                  <div className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
-                    {item.value}
+            <div className="space-y-6">
+              {projectData.map((item, index) => (
+                <div key={index} className="flex items-start gap-4">
+                  <div className="w-12 h-12 min-w-[48px] flex items-center justify-center rounded-lg bg-[#EAF2FF]">
+                    {item.icon}
                   </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Bottom Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          {bottomData.map((item, index) => (
-            <div key={index} className="flex items-start gap-4">
-              <div className="w-12 h-12 min-w-[48px] flex items-center justify-center rounded-lg bg-[#EAF2FF]">
-                {item.icon}
-              </div>
+                  <div className="flex-1 space-y-2">
+                    <p className="font-medium text-xs uppercase text-[#7A7A7A]">
+                      {item.label}
+                    </p>
 
-              <div className="flex-1 space-y-2">
-                <p className="font-medium text-xs uppercase text-[#7A7A7A]">
-                  {item.label}
-                </p>
-
-                <p className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E] break-words">
-                  {item.value}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {previewDocument && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
-          <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4">
-              <div className="min-w-0">
-                <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
-                  Document Preview
-                </h2>
-                <p className="mt-1 text-sm text-slate-500 truncate">
-                  {previewDocument?.originalName ||
-                    previewDocument?.name ||
-                    previewDocument?.filename ||
-                    (previewDocument?.url
-                      ? String(previewDocument.url).split("/").pop()
-                      : "Untitled")}
-                </p>
-              </div>
-              <button
-                onClick={() => setPreviewDocument(null)}
-                className="rounded-lg p-2 hover:bg-slate-100"
-              >
-                <FiX size={20} />
-              </button>
-            </div>
-            <div className="h-[60vh] sm:h-[75vh] bg-slate-100">
-              {previewLoading ? (
-                <div className="flex h-full items-center justify-center text-sm text-slate-500">
-                  Loading document preview...
+                    {typeof item.value === "string" ? (
+                      <p className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
+                        {item.value}
+                      </p>
+                    ) : (
+                      <div className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E]">
+                        {item.value}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              ) : previewUrl ? (
-                <iframe
-                  title={previewDocument?.originalName || "document-preview"}
-                  src={previewUrl}
-                  className="h-full w-full rounded-b-2xl"
-                />
-              ) : previewError ? (
-                <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-sm text-slate-500">
-                  <p className="text-center">{previewError}</p>
+              ))}
+            </div>
+
+            {/* Bottom Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+              {bottomData.map((item, index) => (
+                <div key={index} className="flex items-start gap-4">
+                  <div className="w-12 h-12 min-w-[48px] flex items-center justify-center rounded-lg bg-[#EAF2FF]">
+                    {item.icon}
+                  </div>
+
+                  <div className="flex-1 space-y-2">
+                    <p className="font-medium text-xs uppercase text-[#7A7A7A]">
+                      {item.label}
+                    </p>
+
+                    <p className="font-medium text-sm sm:text-base leading-6 text-[#1E1E1E] break-words">
+                      {item.value}
+                    </p>
+                  </div>
                 </div>
+              ))}
+            </div>
+          </div>
+          {previewDocument && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4">
+              <div className="w-full max-w-4xl rounded-2xl bg-white shadow-2xl">
+                <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="min-w-0">
+                    <h2 className="text-lg sm:text-xl font-semibold text-slate-900">
+                      Document Preview
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-500 truncate">
+                      {previewDocument?.originalName ||
+                        previewDocument?.name ||
+                        previewDocument?.filename ||
+                        (previewDocument?.url
+                          ? String(previewDocument.url).split("/").pop()
+                          : "Untitled")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setPreviewDocument(null)}
+                    className="rounded-lg p-2 hover:bg-slate-100"
+                  >
+                    <FiX size={20} />
+                  </button>
+                </div>
+                <div className="h-[60vh] sm:h-[75vh] bg-slate-100">
+                  {previewLoading ? (
+                    <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                      Loading document preview...
+                    </div>
+                  ) : previewUrl ? (
+                    <iframe
+                      title={previewDocument?.originalName || "document-preview"}
+                      src={previewUrl}
+                      className="h-full w-full rounded-b-2xl"
+                    />
+                  ) : previewError ? (
+                    <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-sm text-slate-500">
+                      <p className="text-center">{previewError}</p>
+                    </div>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-sm text-slate-500">
+                      Document preview is not available for this file.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
+            <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
+              Documents
+            </h1>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {docs.length > 0 ? (
+                docs.map((doc: any, index: number) => {
+                  const name =
+                    doc?.originalName ||
+                    doc?.name ||
+                    doc?.filename ||
+                    String(doc?.url || "")
+                      .split("/")
+                      .pop() ||
+                    "Untitled";
+                  return (
+                    <div
+                      key={doc.id || index}
+                      className="flex items-center justify-between bg-[#EEF4FF] rounded-lg px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 flex items-center justify-center">
+                          <FileText size={22} className="text-[#0059FF]" />
+                        </div>
+
+                        <p className="font-medium text-sm sm:text-base text-[#1E1E1E] truncate">
+                          {name}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDocument(doc)}
+                        className="ml-3"
+                      >
+                        <Eye size={20} className="text-[#00076F]" />
+                      </button>
+                    </div>
+                  );
+                })
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-slate-500">
-                  Document preview is not available for this file.
+                <div className="rounded-2xl bg-[#f9fafc] px-4 py-6 text-sm text-slate-500">
+                  No documents available
                 </div>
               )}
             </div>
           </div>
-        </div>
-      )}
+          <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
+            <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
+              Remarks
+            </h1>
 
-      {/* Documents Card */}
-      <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
-          Documents
-        </h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {docs.length > 0 ? (
-            docs.map((doc: any, index: number) => {
-              const name =
-                doc?.originalName ||
-                doc?.name ||
-                doc?.filename ||
-                String(doc?.url || "")
-                  .split("/")
-                  .pop() ||
-                "Untitled";
-              return (
-                <div
-                  key={doc.id || index}
-                  className="flex items-center justify-between bg-[#EEF4FF] rounded-lg px-4 py-3"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 flex items-center justify-center">
-                      <FileText size={22} className="text-[#0059FF]" />
-                    </div>
-
-                    <p className="font-medium text-sm sm:text-base text-[#1E1E1E] truncate">
-                      {name}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setPreviewDocument(doc)}
-                    className="ml-3"
-                  >
-                    <Eye size={20} className="text-[#00076F]" />
-                  </button>
-                </div>
-              );
-            })
-          ) : (
-            <div className="rounded-2xl bg-[#f9fafc] px-4 py-6 text-sm text-slate-500">
-              No documents available
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Remarks Card */}
-      <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-        <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-4">
-          Remarks
-        </h1>
-
-        {/* Input Section */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-start mb-5">
-          <textarea
-            placeholder="Enter Here..."
-            value={remark}
-            onChange={(e) => setRemark(e.target.value)}
-            className="
+            {/* Input Section */}
+            {
+              userRole !== "ADMIN" && (<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-start mb-5">
+                <textarea
+                  placeholder="Enter Here..."
+                  value={remark}
+                  onChange={(e) => setRemark(e.target.value)}
+                  className="
               w-full
               border border-gray-300
               rounded-xl
@@ -467,10 +459,10 @@ function ViewProject() {
               h-24 sm:h-20
               focus:ring-2 focus:ring-blue-500
             "
-          />
+                />
 
-          <button
-            className="
+                <button
+                  className="
               bg-blue-600
               hover:bg-blue-700
               text-white
@@ -482,65 +474,68 @@ function ViewProject() {
               w-full sm:w-auto
               min-w-[100px]
             "
-          >
-            Save
-          </button>
-        </div>
+                >
+                  Save
+                </button>
+              </div>)
+            }
 
-        {/* Remarks List */}
-        <div className="space-y-4">
-          {remarksData.map((item) => (
-            <div key={item.id} className="bg-[#F5F5F5] rounded-2xl p-4 sm:p-5">
-              {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="    w-8
-    h-8
-    rounded-[20px]
-    flex
-    items-center
-    justify-center
-    bg-white
-    opacity-100"
-                  >
-                    <User size={14} className="text-blue-500" />
+
+            {/* Remarks List */}
+            <div className="space-y-4">
+              {remarksData.map((item) => (
+                <div key={item.id} className="bg-[#F5F5F5] rounded-2xl p-4 sm:p-5">
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="    w-8
+                        h-8
+                        rounded-[20px]
+                        flex
+                        items-center
+                        justify-center
+                        bg-white
+                        opacity-100"
+                      >
+                        <User size={14} className="text-blue-500" />
+                      </div>
+
+                      <h3
+                        className=" font-[Poppins]
+                                  font-medium
+                                  text-[14px]
+                                  leading-[100%]
+                                  tracking-[0%]
+                                  text-[#7A7A7A]"
+                      >
+                        {item.name}
+                      </h3>
+                    </div>
+
+                    <span className="text-xs sm:text-sm text-gray-500">
+                      {item.time}
+                    </span>
                   </div>
 
-                  <h3
-                    className=" font-[Poppins]
-    font-medium
-    text-[14px]
-    leading-[100%]
-    tracking-[0%]
-    text-[#7A7A7A]"
+                  {/* Remark Text */}
+                  <p
+                    className="
+                            font-[Poppins]
+                            font-medium
+                            text-[14px]
+                            leading-[100%]
+                            tracking-[0%]
+                            text-[#161616]
+                          "
                   >
-                    {item.name}
-                  </h3>
+                    {item.remark}
+                  </p>
                 </div>
-
-                <span className="text-xs sm:text-sm text-gray-500">
-                  {item.time}
-                </span>
-              </div>
-
-              {/* Remark Text */}
-              <p
-                className="
-    font-[Poppins]
-    font-medium
-    text-[14px]
-    leading-[100%]
-    tracking-[0%]
-    text-[#161616]
-  "
-              >
-                {item.remark}
-              </p>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
+          </div>
+        </>)}
     </div>
   );
 }

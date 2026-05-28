@@ -31,7 +31,7 @@ export const sidebarMenu: SidebarMenuItem[] = [
 
   {
     label: "My Projects",
-    path: "/my-projects",
+    path: "/projects",
     icon: <FiFolder />,
     roles: [
       ROLES.MANAGER,
@@ -40,7 +40,7 @@ export const sidebarMenu: SidebarMenuItem[] = [
 
   {
     label: "Users",
-    path: "/managers",
+    path: "/users",
     icon: <FiUserCheck />,
     roles: [ROLES.ADMIN],
   },

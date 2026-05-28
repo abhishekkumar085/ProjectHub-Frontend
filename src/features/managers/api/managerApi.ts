@@ -62,7 +62,7 @@ export const getManager = async (
 
     return payload;
   } catch {
-    const response = await api.get(`/managers/${id}`);
+    const response = await api.get(`/users/${id}`);
     const payload = response.data as any;
 
     if (payload?.data?.manager) {
@@ -93,7 +93,7 @@ export const updateManager = async (
   payload: Partial<CreateManagerPayload>
 ): Promise<Manager> => {
   const response = await api.put(
-    `/managers/${id}`,
+    `/users/${id}`,
     payload
   );
 
@@ -104,6 +104,6 @@ export const deleteManager = async (
   id: string
 ): Promise<void> => {
   await api.delete(
-    `/managers/${id}`
+    `/users/${id}`
   );
 };

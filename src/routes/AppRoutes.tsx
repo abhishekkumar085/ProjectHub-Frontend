@@ -35,8 +35,8 @@ function AppRoutes() {
         <Route path="projects/add-edit" element={<AddEditProjects/>} />
         <Route path="projects/view/:id" element={<ViewProject/>} />
         <Route path="my-projects" element={<Projects/>} />
-        <Route path="managers" element={<Managers/>} />
-        <Route path="managers/add" element={<AddManager/>} />
+        <Route path="users" element={<Managers/>} />
+        <Route path="users/add" element={<AddManager/>} />
         <Route path="users/:id/projects" element={<ViewDetails/>} />
         <Route path="profile" element={<Profile/>} />
         <Route path="profile/edit" element={<EditProfile/>} />

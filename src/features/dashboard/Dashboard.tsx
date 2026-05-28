@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { getDashboardApi } from "../dashboard/api/DashboardApi";
 import Highcharts from "highcharts";
 
+import Loader from "../../components/common/Loader";
 import { HighchartsReact } from "highcharts-react-official";
 
 interface KpiTile {
@@ -73,9 +74,9 @@ function Dashboard() {
     fetchDashboard();
   }, []);
 
-  if (loading) {
-    return <div className="p-6 text-[#00076F] font-[Poppins]">Loading Dashboard...</div>;
-  }
+  // if (loading) {
+  //   return <Loader />;
+  // }
 
   const graphData = dashboard?.graphData ?? [];
 

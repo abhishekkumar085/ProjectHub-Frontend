@@ -66,7 +66,7 @@ function AddManager() {
 
       showSuccessToast("Manager created successfully.");
       reset();
-      navigate("/managers");
+      navigate("/users");
     } catch (error: any) {
       console.error(error);
       showErrorToast(
@@ -79,7 +79,7 @@ function AddManager() {
   return (
     <div className="w-full ">
       {/* Breadcrumb */}
-      <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/managers", label: "Users" }, { label: "Add User" }]} />
+      <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/users", label: "Users" }, { label: "Add User" }]} />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
@@ -90,7 +90,7 @@ function AddManager() {
         </div>
 
         <button
-          onClick={() => navigate("/managers")}
+          onClick={() => navigate("/users")}
           className="inline-flex items-center gap-2 px-4 py-2 font-[Poppins] font-medium text-[14px] leading-[120%] tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 self-start sm:self-auto"
         >
           <FiArrowLeft />
@@ -335,7 +335,7 @@ function AddManager() {
         <div className="mt-8 flex flex-col sm:flex-row gap-3 sm:justify-end">
           <button
             type="button"
-            onClick={() => navigate("/managers")}
+            onClick={() => navigate("/users")}
             className="w-full sm:w-auto rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             Cancel

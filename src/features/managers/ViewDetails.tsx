@@ -19,6 +19,7 @@ import { listProjectsForUser } from "../project/api/projectApi";
 import StatusBadge from "../project/StatusBadge";
 import PriorityBadge from "../project/PriorityBadge";
 import Breadcrumb from "../../components/common/Breadcrumb";
+import Loader from "../../components/common/Loader";
 
 interface Manager {
   name?: string;
@@ -80,7 +81,7 @@ function ViewDetails() {
           <Breadcrumb
             items={[
               { to: "/", label: "Home" },
-              { to: "/managers", label: "Users" },
+              { to: "/users", label: "Users" },
               { label: "User Details" },
             ]}
           />
@@ -91,7 +92,7 @@ function ViewDetails() {
           User Details
         </h2>
         <button
-          onClick={() => navigate("/managers")}
+          onClick={() => navigate("/users")}
           className="inline-flex items-center gap-2 px-4 py-2 
           font-[Poppins] font-medium text-[14px] leading-[120%]
           tracking-[-0.01em] text-[#7A7A7A] hover:bg-slate-50 
@@ -103,7 +104,7 @@ function ViewDetails() {
       </div>
       {/* Loading / Error */}
       {loading ? (
-        <div className="p-10 text-center text-slate-600">Loading...</div>
+        <Loader />
       ) : error ? (
         <div className="p-10 text-center text-red-600">{error}</div>
       ) : (

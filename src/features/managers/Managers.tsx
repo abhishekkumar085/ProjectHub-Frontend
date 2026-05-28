@@ -11,6 +11,7 @@ import {
 import plusIcon from "../../assets/plus icon.png";
 import { listManagers, updateManager } from "./api/managerApi";
 import type { Manager } from "./types/manager.types";
+import Loader from "../../components/common/Loader";
 import Pagination from "../../components/common/Pagination";
 
 function Managers() {
@@ -89,7 +90,7 @@ function Managers() {
           </div>
 
           <button
-            onClick={() => navigate("/managers/add")}
+            onClick={() => navigate("/users/add")}
             className="inline-flex h-[40px] sm:h-[45px] items-center gap-2 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium text-white whitespace-nowrap"
             style={{
               background: "linear-gradient(90deg, #0059FF 0%, #003699 100%)",
@@ -105,7 +106,7 @@ function Managers() {
       {/* Table */}
       <div className="overflow-x-auto">
         {loading ? (
-          <div className="p-10 text-center">Loading...</div>
+          <Loader />
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-14 text-center">
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
