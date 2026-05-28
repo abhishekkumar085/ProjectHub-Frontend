@@ -57,9 +57,19 @@ export interface Project {
   assignedUsers?: string[];
   isEnabled?: boolean;
   members?: ProjectMember[];
+  remarks?: Remark[];
   // createdAt: string;
   // updatedAt: string;
 }
+
+export type Remark = {
+  remark: string;
+  createdAt: string;
+  addedBy: {
+    name: string;
+  };
+};
+
 
 
 

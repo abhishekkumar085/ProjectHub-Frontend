@@ -14,8 +14,8 @@ import {
 import { FiArrowLeft, FiX } from "react-icons/fi";
 import Breadcrumb from "../../components/common/Breadcrumb";
 import Loader from "../../components/common/Loader";
-import { getProjectById } from "./api/projectApi";
-import type { Project } from "./types/project.types";
+import { createProjectRemark, getProjectById } from "./api/projectApi";
+import type { Project, Remark } from "./types/project.types";
 
 function ViewProject() {
   const { id } = useParams<{ id: string }>();
@@ -245,21 +245,13 @@ function ViewProject() {
 
   const docs = project?.documents || [];
 
-  const remarksData = [
-    {
-      id: 1,
-      name: "Yasmeen Hedge",
-      time: "22/05/2026 03:30 PM",
-      remark:
-        "The project timeline has been extended due to unforeseen challenges and additional requirement updates during the development phase.",
-    },
-    {
-      id: 2,
-      name: "Siddhesh Katre",
-      time: "22/05/2026 03:30 PM",
-      remark: "Thank you for your understanding regarding the project delay.",
-    },
-  ];
+
+  const handleRemarkSave = async (remark: string) => {
+    if (!id) return
+    await createProjectRemark(id, remark)
+  }
+
+
 
   return (
     <div className="space-y-6">
@@ -371,7 +363,7 @@ function ViewProject() {
                     </div>
                   ) : previewUrl ? (
                     <iframe
-                      title={previewDocument?.originalName || "document-preview"}
+                      title={previewDocuemnt?.originalName || "document-preview"}
                       src={previewUrl}
                       className="h-full w-full rounded-b-2xl"
                     />
@@ -474,6 +466,7 @@ function ViewProject() {
               w-full sm:w-auto
               min-w-[100px]
             "
+                  onClick={() => handleRemarkSave(remark)}
                 >
                   Save
                 </button>
@@ -483,56 +476,59 @@ function ViewProject() {
 
             {/* Remarks List */}
             <div className="space-y-4">
-              {remarksData.map((item) => (
-                <div key={item.id} className="bg-[#F5F5F5] rounded-2xl p-4 sm:p-5">
-                  {/* Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="    w-8
-                        h-8
-                        rounded-[20px]
-                        flex
-                        items-center
-                        justify-center
-                        bg-white
-                        opacity-100"
-                      >
-                        <User size={14} className="text-blue-500" />
-                      </div>
-
-                      <h3
-                        className=" font-[Poppins]
-                                  font-medium
-                                  text-[14px]
-                                  leading-[100%]
-                                  tracking-[0%]
-                                  text-[#7A7A7A]"
-                      >
-                        {item.name}
-                      </h3>
-                    </div>
-
-                    <span className="text-xs sm:text-sm text-gray-500">
-                      {item.time}
-                    </span>
-                  </div>
-
-                  {/* Remark Text */}
-                  <p
-                    className="
-                            font-[Poppins]
-                            font-medium
-                            text-[14px]
-                            leading-[100%]
-                            tracking-[0%]
-                            text-[#161616]
-                          "
-                  >
-                    {item.remark}
-                  </p>
+              {project?.remarks?.length > 0 &&
+        project?.remarks?.map((item: Remark, index: number) => (
+          <div
+            key={index}
+            className="bg-[#F5F5F5] rounded-2xl p-4 sm:p-5"
+          >
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <div
+                  className="
+                    w-8
+                    h-8
+                    rounded-[20px]
+                    flex
+                    items-center
+                    justify-center
+                    bg-white
+                  "
+                >
+                  <User size={14} className="text-blue-500" />
                 </div>
-              ))}
+
+                <h3
+                  className="
+                    font-[Poppins]
+                    font-medium
+                    text-[14px]
+                    text-[#7A7A7A]
+                  "
+                >
+                  {item?.addedBy?.name}
+                </h3>
+              </div>
+
+              <span className="text-xs sm:text-sm text-gray-500">
+                {item?.createdAt}
+              </span>
+            </div>
+
+            {/* Remark Text */}
+            <p
+              className="
+                font-[Poppins]
+                font-medium
+                text-[14px]
+                text-[#161616]
+              "
+            >
+              {item?.remark}
+            </p>
+          </div>
+        ))}
             </div>
           </div>
         </>)}

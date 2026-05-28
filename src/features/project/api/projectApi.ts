@@ -226,3 +226,16 @@ export const uploadDocument = async (
 
   return res.data.data;
 };
+
+export const createProjectRemark = async (
+  projectId: string,
+  remark: string
+): Promise<any> => {
+  
+  const res = await api.post(
+    `/project/${projectId}/create-remark`,
+  {remark}
+  );
+
+  return res.data.data;
+};
