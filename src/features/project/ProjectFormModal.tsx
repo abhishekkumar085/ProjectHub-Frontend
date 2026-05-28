@@ -233,6 +233,7 @@ const onSubmit = async (
                     .filter((f): f is File => !!f),
                 undefined,
             );
+            window.dispatchEvent(new Event("projectUpdated"));
         }
 
         refresh();

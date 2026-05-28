@@ -220,8 +220,7 @@ export default function ProjectFormInline({
     setError,
     clearErrors,
     setValue,
-    trigger,
-    formState: { errors, isSubmitted },
+    formState: { errors },
   } = useForm<CreateProjectPayload>({
     defaultValues: {
       name: "",
@@ -430,6 +429,7 @@ export default function ProjectFormInline({
           assignedTo.length ? assignedTo : undefined,
         );
         showSuccessToast("Project updated successfully.");
+        window.dispatchEvent(new Event("projectUpdated"));
       }
 
       onSaved?.();
@@ -894,6 +894,15 @@ export default function ProjectFormInline({
                         Word, PPT
                       </p>
 
+                      {uploadingFile && (
+                        <div className="mt-4 w-full">
+                          <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200">
+                            <div className="h-full w-3/4 animate-pulse rounded-full bg-blue-500" />
+                          </div>
+                          <p className="mt-2 text-xs text-slate-500">Uploading files...</p>
+                        </div>
+                      )}
+
                       <input
                         type="file"
                         hidden
@@ -1002,7 +1011,8 @@ export default function ProjectFormInline({
                     "linear-gradient(90deg, #6B9FFF 0%, #0059FF 100%) 1",
                 }}
               >
-                Save Details
+                {saving ? "Saving..." : "Save Details"}
+
               </button>
             </div>
           </form>

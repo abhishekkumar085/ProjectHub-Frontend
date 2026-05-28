@@ -87,7 +87,7 @@ function AddManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
         <div>
-          <h1 className="font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-[0px] text-[#00076F]">
+          <h1 className="font-[Poppins] text-[20px] font-semibold leading-[100%] tracking-normal text-[#00076F]">
             Add Users
           </h1>
         </div>
@@ -108,7 +108,7 @@ function AddManager() {
       >
         {/* Card */}
         <div className="w-full p-4 sm:p-5 lg:p-6 space-y-4 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
-          <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0px] text-[#161616] mb-2">
+          <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-normal text-[#161616] mb-2">
             Basic Information
           </h1>
 
@@ -116,7 +116,7 @@ function AddManager() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mt-3">
             {/* Full Name */}
             <div>
-              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Full Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -139,7 +139,7 @@ function AddManager() {
 
             {/* Email */}
             <div>
-              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Email <span className="text-red-500">*</span>
               </label>
               <input
@@ -163,7 +163,7 @@ function AddManager() {
 
             {/* Employee ID */}
             <div>
-              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Employee ID <span className="text-red-500">*</span>
               </label>
               <input
@@ -187,7 +187,7 @@ function AddManager() {
 
             {/* Designation */}
             <div>
-              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Designation
               </label>
               <input
@@ -217,7 +217,7 @@ function AddManager() {
 
             {/* Role */}
             <div>
-              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Role <span className="text-red-500">*</span>
               </label>
               <Controller
@@ -272,7 +272,7 @@ function AddManager() {
 
             {/* Mobile Number */}
             <div>
-              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Mobile Number <span className="text-red-500">*</span>
               </label>
               <input
@@ -296,7 +296,7 @@ function AddManager() {
 
             {/* Password */}
             <div>
-              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -335,7 +335,7 @@ function AddManager() {
 
             {/* Confirm Password */}
             <div>
-              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
+              <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Confirm Password <span className="text-red-500">*</span>
               </label>
                <div className="relative">
@@ -391,10 +391,10 @@ function AddManager() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full sm:w-[135px] h-[45px] rounded-[8px] border
+            className="w-full sm:w-33.75 h-11.25 rounded-lg border
         bg-[linear-gradient(90deg,#0059FF_0%,#003699_100%)]
         px-6 py-3 font-[Poppins] font-medium text-[14px]
-        leading-[100%] tracking-[0px] text-center text-white
+        leading-[100%] tracking-normal text-center text-white
         transition hover:opacity-90
         disabled:cursor-not-allowed disabled:opacity-50"
           >

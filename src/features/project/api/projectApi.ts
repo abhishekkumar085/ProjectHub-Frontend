@@ -143,6 +143,27 @@ export const listProjectsForUser = async (
   return { projects: [], total: 0, page, limit, totalPages: 1, manager };
 };
 
+export type IncompleteProjectCountResult = {
+  incompleteProjectCount: number;
+};
+
+export const getIncompleteProjectCount = async (
+  userId: string,
+): Promise<IncompleteProjectCountResult> => {
+  const res = await api.get(`/project/user/${userId}/incomplete-projects/count`);
+  const payload = res.data as any;
+
+  if (payload?.data?.incompleteProjectCount != null) {
+    return { incompleteProjectCount: payload.data.incompleteProjectCount };
+  }
+
+  if (payload?.incompleteProjectCount != null) {
+    return { incompleteProjectCount: payload.incompleteProjectCount };
+  }
+
+  return { incompleteProjectCount: 0 };
+};
+
 export const createProject = async (
   payload: CreateProjectPayload,
   files: File[],
