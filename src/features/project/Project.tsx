@@ -4,6 +4,8 @@ import {
   FiFolder,
   FiToggleLeft,
   FiToggleRight,
+  FiUsers,
+  FiTrash2,
   FiEdit2,
   FiEye,
   FiSearch,
@@ -17,6 +19,7 @@ import type { Project } from "./types/project.types";
 import { listProjects, updateProject } from "./api/projectApi";
 import Loader from "../../components/common/Loader";
 import Pagination from "../../components/common/Pagination";
+import EmptyState from "../../components/Emptyset";
 
 function Projects() {
   // const [items, setItems] = useState<Project[]>([]);
@@ -148,18 +151,23 @@ function Projects() {
       ) : (
         <div className="overflow-x-auto">
           {items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-14 text-center">
-              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                <FiFolder size={30} />
-              </div>
+            // <div className="flex flex-col items-center justify-center p-14 text-center">
+            //   <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+            //     <FiFolder size={30} />
+            //   </div>
 
-              <h3 className="text-lg font-semibold">No projects yet</h3>
+            //   <h3 className="text-lg font-semibold">No projects yet</h3>
 
-              <p className="mt-2 max-w-md text-sm text-slate-500">
-                Create your first project to start tracking work, developers, and
-                documents.
-              </p>
-            </div>
+            //   <p className="mt-2 max-w-md text-sm text-slate-500">
+            //     Create your first project to start tracking work, developers, and
+            //     documents.
+            //   </p>
+            // </div>
+               <EmptyState
+            icon={<FiUsers size={30} />}
+            title="No projects yet"
+            description="Create your first project to start tracking work, developers, and documents."
+          /> 
           ) : (
             <>
               <table className="min-w-175 w-full table-fixed border-separate border-spacing-y-2">

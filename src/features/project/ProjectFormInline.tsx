@@ -683,7 +683,7 @@ export default function ProjectFormInline({
                     {...register("clientName", isAdmin ? {} : { required: "Client name is required" })}
                     disabled={isViewOnly}
                     className={getInputClassName(!!errors.clientName)}
-                    placeholder="Optional"
+                    placeholder="Enter client name"
                   />
                   {errors.clientName && (
                     <p className="mt-1 text-sm text-red-500 text-[12px]">

@@ -1,14 +1,17 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import Select from "react-select";
-import { FiArrowLeft, FiChevronRight } from "react-icons/fi";
+import { FiArrowLeft, FiEye, FiEyeOff } from "react-icons/fi";
 import { createManager } from "./api/managerApi";
 import type { CreateManagerPayload } from "./types/manager.types";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import Breadcrumb from "../../components/common/Breadcrumb";
+import { useState } from "react";
 
 function AddManager() {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
     register,
     control,
@@ -32,7 +35,7 @@ function AddManager() {
   });
 
   const getInputClassName = (hasError?: boolean) =>
-    `w-full min-w-0 rounded-xl border px-4 py-3 outline-none ${hasError ? "border-red-500 focus:border-red-500" : "border-slate-300 focus:border-blue-500"}`;
+    `w-full min-w-0 rounded-xl border px-4 py-3 pr-12 outline-none ${hasError ? "border-red-500 focus:border-red-500" : "border-slate-300 focus:border-blue-500"}`;
 
   const password = watch("password");
 
@@ -190,8 +193,26 @@ function AddManager() {
               <input
                 {...register("designation")}
                 className={getInputClassName(!!errors.designation)}
+                maxLength={50}
+                {...register("designation", {
+                  pattern: {
+                    value: /^[A-Za-z\s]+$/,
+                    message: "Designation should contain only letters",
+                  },
+
+                  maxLength: {
+                    value: 50,
+                    message: "Designation cannot exceed 50 characters",
+                  },
+                })}
                 placeholder="Project Manager"
               />
+
+              {errors.designation && (
+                <p className="mt-1 text-sm text-red-500">
+                  {errors.designation.message}
+                </p>
+              )}
             </div>
 
             {/* Role */}
@@ -259,7 +280,7 @@ function AddManager() {
                 {...register("mobileNumber", {
                   required: "Mobile number is required",
                   pattern: {
-                    value: /^[0-9]{10,15}$/,
+                    value: /^[6-9]\d{9}$/,
                     message: "Enter a valid mobile number",
                   },
                 })}
@@ -278,8 +299,10 @@ function AddManager() {
               <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
                 Password <span className="text-red-500">*</span>
               </label>
+              <div className="relative">
               <input
-                type="password"
+                // type="password"
+                type={showPassword ? "text" : "password"}
                 form="add-manager-form"
                 {...register("password", {
                   required: "Password is required",
@@ -292,9 +315,17 @@ function AddManager() {
                 onPaste={preventCopyPaste}
                 onCut={preventCopyPaste}
                 onKeyDown={preventCopyPaste}
-                className={getInputClassName(!!errors.password)}
+                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-blue-500"
                 placeholder="Enter password"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+              >
+                {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+              </button>
+              </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.password.message}
@@ -307,8 +338,10 @@ function AddManager() {
               <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-[0px] text-[#444444]">
                 Confirm Password <span className="text-red-500">*</span>
               </label>
+               <div className="relative">
               <input
-                type="password"
+                // type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 form="add-manager-form"
                 {...register("confirmPassword", {
                   required: "Confirm password is required",
@@ -322,6 +355,20 @@ function AddManager() {
                 className={getInputClassName(!!errors.confirmPassword)}
                 placeholder="Re-enter password"
               />
+               <button
+                  type="button"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+                >
+                  {showConfirmPassword ? (
+                    <FiEyeOff size={20} />
+                  ) : (
+                    <FiEye size={20} />
+                  )}
+                </button>
+                </div>
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.confirmPassword.message}

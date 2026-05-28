@@ -1,4 +1,5 @@
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -13,5 +14,23 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+
+      toast.error(
+        error.response?.data?.message || "Session expired"
+      );
+
+      setTimeout(() => {
+        window.location.href = "/login";
+      }, 1000);
+    }
+    return Promise.reject(error);
+  }
+)
 
 export default api;

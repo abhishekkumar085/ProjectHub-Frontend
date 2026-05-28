@@ -13,6 +13,7 @@ import { listManagers, updateManager } from "./api/managerApi";
 import type { Manager } from "./types/manager.types";
 import Loader from "../../components/common/Loader";
 import Pagination from "../../components/common/Pagination";
+import EmptyState from "../../components/Emptyset";
 
 function Managers() {
   const [items, setItems] = useState<Manager[]>([]);
@@ -108,13 +109,18 @@ function Managers() {
         {loading ? (
           <Loader />
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-14 text-center">
-            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-              <FiUsers size={30} />
-            </div>
+          // <div className="flex flex-col items-center justify-center p-14 text-center">
+          //   <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+          //     <FiUsers size={30} />
+          //   </div>
 
-            <h3 className="text-lg font-semibold">No managers found</h3>
-          </div>
+          //   <h3 className="text-lg font-semibold">No managers found</h3>
+          // </div>
+          <EmptyState
+            icon={<FiUsers size={30} />}
+            title="No users found"
+            description="There are no users available right now."
+          />  
         ) : (
           <table className="min-w-[800px] w-full table-fixed border-separate border-spacing-y-2">
             <thead>
