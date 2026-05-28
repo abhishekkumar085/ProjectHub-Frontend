@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  FiFolder,
   FiToggleLeft,
   FiToggleRight,
   FiUsers,
-  FiTrash2,
   FiEdit2,
   FiEye,
   FiSearch,
@@ -89,6 +87,7 @@ function Projects() {
             : item,
         ),
       );
+      window.dispatchEvent(new Event("projectUpdated"));
     } catch (error) {
       console.error("Failed to toggle project state:", error);
     }

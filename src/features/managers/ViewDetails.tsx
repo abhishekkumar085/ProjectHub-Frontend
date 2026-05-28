@@ -129,7 +129,7 @@ function ViewDetails() {
               </div>
 
               {/* Inline Info */}
-              <div className="flex flex-wrap items-center gap-[20px] text-sm text-white">
+              <div className="flex flex-wrap items-center gap-5 text-sm text-white">
                 <div className="flex items-center gap-2">
                   <FiMail className="text-white/80" />
                   <span>{manager?.email || "—"}</span>
@@ -241,7 +241,7 @@ function ViewDetails() {
                               End Date
                             </p>
 
-                            <p className="mt-[2px] font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
+                            <p className="mt-0.5 font-[Poppins] font-medium text-[14px] leading-[100%] tracking-[0%] text-[#161616]">
                               {formatDate(project.endDate)}
                             </p>
                           </div>
