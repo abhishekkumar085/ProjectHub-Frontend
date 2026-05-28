@@ -363,7 +363,7 @@ function ViewProject() {
                     </div>
                   ) : previewUrl ? (
                     <iframe
-                      title={previewDocuemnt?.originalName || "document-preview"}
+                      title={previewDocument?.originalName || "document-preview"}
                       src={previewUrl}
                       className="h-full w-full rounded-b-2xl"
                     />
