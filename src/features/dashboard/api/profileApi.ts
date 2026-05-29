@@ -39,24 +39,14 @@ const saveStoredUser = (user: ProfileUser) => {
   localStorage.setItem("user", JSON.stringify({ ...storedUser, ...user }));
 };
 
-export const getProfile = async (): Promise<ProfileUser> => {
-  const storedUser = readStoredUser();
-  const userId = storedUser?.id ?? storedUser?._id;
-
+export const getProfile = async () => {
   try {
-    const response = await api.get("/profile/profile");
+    const response = await api.get("/profile/me");
     const user = getUserFromResponse(response.data);
     saveStoredUser(user);
-    return user;
+     return response.data.user; 
   } catch (error) {
-    if (!userId) {
-      throw error;
-    }
-
-    const response = await api.get(`/users/${userId}`);
-    const user = getUserFromResponse(response.data);
-    saveStoredUser(user);
-    return user;
+   console.log("Error while getting profile")
   }
 };
 
