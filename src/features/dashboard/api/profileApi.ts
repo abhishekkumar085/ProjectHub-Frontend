@@ -12,8 +12,8 @@ export type ProfileUser = {
 };
 
 export type UpdateProfilePayload = {
+  name:string;
   designation: string;
-  role: string;
   mobileNumber: string;
 };
 
@@ -52,24 +52,17 @@ export const getProfile = async () => {
 
 export const updateProfile = async (
   payload: UpdateProfilePayload,
-): Promise<ProfileUser> => {
+) => {
   const storedUser = readStoredUser();
-  const userId = storedUser?.id ?? storedUser?._id;
-
+  const userId = storedUser?.id
   try {
     if (!userId) {
       throw new Error("Profile id is missing");
     }
-
-    const response = await api.put(`/users/${userId}`, payload);
-    const user = { ...storedUser, ...payload, ...getUserFromResponse(response.data) };
-    saveStoredUser(user);
-    return user;
-  } catch (error) {
     const response = await api.patch("/profile/edit-profile", payload);
-    const user = { ...storedUser, ...payload, ...getUserFromResponse(response.data) };
-    saveStoredUser(user);
-    return user;
+
+  } catch (error) {
+    console.log("Error ",error)
   }
 };
 
