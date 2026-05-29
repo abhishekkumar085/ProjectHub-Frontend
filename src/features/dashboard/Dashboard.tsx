@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { getDashboardApi } from "../dashboard/api/DashboardApi";
 import Highcharts from "highcharts";
 import { HighchartsReact } from "highcharts-react-official";
+import Loader from "../../components/common/Loader";
 
 interface KpiTile {
   label: string;
@@ -72,9 +73,9 @@ function Dashboard() {
     fetchDashboard();
   }, []);
 
-  // if (loading) {
-  //   return <Loader />;
-  // }
+  if (loading) {
+    return <Loader />;
+  }
 
   const graphData = dashboard?.graphData ?? [];
   const maxValue = Math.max(
