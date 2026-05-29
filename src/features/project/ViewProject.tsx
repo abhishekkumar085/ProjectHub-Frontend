@@ -28,6 +28,7 @@ function ViewProject() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
   const [remarkLoading, setRemarkLoading] = useState(false);
+  const [openDevelopersModal, setOpenDevelopersModal] = useState(false);
 
   const [previewDocument, setPreviewDocument] = useState<any | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -208,10 +209,34 @@ function ViewProject() {
         ]
       : []),
     {
-      icon: <Users size={20} className="text-blue-600" />,
-      label: "DEVELOPERS",
-      value: project?.developers?.join(", ") || "-",
-    },
+  icon: <Users size={20} className="text-blue-600" />,
+  label: "DEVELOPERS",
+  value:
+    project?.developers?.length > 0 ? (
+      <div className="flex items-center gap-3 flex-wrap">
+        {project.developers.slice(0, 3).map((developer: string) => (
+          <span
+            key={developer}
+            className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+          >
+            {developer}
+          </span>
+        ))}
+
+        {project.developers.length > 3 && (
+          <button
+            type="button"
+            onClick={() => setOpenDevelopersModal(true)}
+            className="text-sm text-blue-600 font-medium hover:underline"
+          >
+            +{project.developers.length - 3} more
+          </button>
+        )}
+      </div>
+    ) : (
+      "-"
+    ),
+},
   ];
 
   const bottomData = [
@@ -470,7 +495,7 @@ function ViewProject() {
               text-sm sm:text-base
               outline-none
               resize-none
-              h-24 sm:h-20
+              h-16 sm:h-15
               focus:ring-2 focus:ring-blue-500
             "
                 />
@@ -486,8 +511,8 @@ function ViewProject() {
               font-medium
               transition-all
               w-full sm:w-auto
-              min-w-[100px]
-
+              self-stretch sm:self-auto
+              h-16 sm:h-15
             "
                   disabled={remark.trim() === "" || remarkLoading}
                   onClick={() => handleRemarkSave(remark)}
@@ -498,7 +523,7 @@ function ViewProject() {
             )}
 
             {/* Remarks List */}
-            <div className="space-y-4">
+            <div className="max-h-80 overflow-y-auto space-y-4 pr-1">
               {project?.remarks!?.length > 0 &&
                 project?.remarks?.map((item: Remark, index: number) => (
                   <div
@@ -557,6 +582,55 @@ function ViewProject() {
           </div>
         </>
       )}
+{openDevelopersModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900">
+            Developers
+          </h2>
+
+          <p className="text-sm text-slate-500">
+            {project?.developers?.length} Members
+          </p>
+        </div>
+
+        <button
+          onClick={() => setOpenDevelopersModal(false)}
+          className="rounded-lg p-2 transition hover:bg-slate-100"
+        >
+          <FiX size={20} className="text-slate-600" />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="max-h-[350px] overflow-y-auto px-5 py-4">
+        <div className="space-y-3">
+          {project?.developers?.map((developer: string, index: number) => (
+            <div
+              key={developer}
+              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"
+            >
+              {/* Number */}
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-semibold text-blue-700">
+                {index + 1}
+              </div>
+
+              {/* Name */}
+              <p className="text-sm font-medium text-slate-800">
+                {developer}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
