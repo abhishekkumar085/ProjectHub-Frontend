@@ -79,7 +79,17 @@ function Dashboard() {
   // }
 
   const graphData = dashboard?.graphData ?? [];
+  const maxValue = Math.max(
+  ...graphData.flatMap((item) => [item.active, item.completed]),
+  0
+);
 
+const dynamicMax = maxValue === 0 ? 10 : Math.ceil(maxValue / 5) * 5;
+
+const dynamicTickInterval = Math.max(
+  1,
+  Math.ceil(dynamicMax / 5)
+);
   const chartOptions = {
     chart: {
       type: "spline",
@@ -107,9 +117,9 @@ function Dashboard() {
       },
     },
     yAxis: {
-      min: 0,
-      max: 10,
-      tickInterval: 2,
+       min: 0,
+      max: dynamicMax,
+      tickInterval: dynamicTickInterval,
       lineWidth: 1,
       lineColor: "#D9D9D9",
       gridLineWidth: 1,
