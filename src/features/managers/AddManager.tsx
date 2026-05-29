@@ -74,7 +74,7 @@ function AddManager() {
       console.error(error);
       showErrorToast(
         error?.response?.data?.message ||
-        "Failed to create manager. Please try again.",
+          "Failed to create manager. Please try again.",
       );
     }
   };
@@ -82,7 +82,13 @@ function AddManager() {
   return (
     <div className="w-full ">
       {/* Breadcrumb */}
-      <Breadcrumb items={[{ to: "/", label: "Home" }, { to: "/users", label: "Users" }, { label: "Add User" }]} />
+      <Breadcrumb
+        items={[
+          { to: "/", label: "Home" },
+          { to: "/users", label: "Users" },
+          { label: "Add User" },
+        ]}
+      />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-3">
@@ -228,6 +234,7 @@ function AddManager() {
                 render={({ field }) => {
                   const options = [
                     { value: "", label: "Select Role" },
+                    { value: "ADMIN", label: "Admin" },
                     { value: "MANAGER", label: "Manager" },
                     { value: "LEADERSHIP", label: "Leadership" },
                   ];
@@ -247,12 +254,12 @@ function AddManager() {
                           ...base,
                           width: "100%",
                           borderRadius: "0.75rem",
+                          borderColor: errors.role ? "#ef4444" : "#cbd5e1",
+                          minHeight: "3rem",
+                          boxShadow: "none",
+                          "&:hover": {
                             borderColor: errors.role ? "#ef4444" : "#cbd5e1",
-                            minHeight: "3rem",
-                            boxShadow: "none",
-                            "&:hover": {
-                              borderColor: errors.role ? "#ef4444" : "#cbd5e1",
-                            },
+                          },
                         }),
                         menu: (base) => ({
                           ...base,
@@ -300,31 +307,31 @@ function AddManager() {
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-              <input
-                // type="password"
-                type={showPassword ? "text" : "password"}
-                form="add-manager-form"
-                {...register("password", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 6,
-                    message: "Password must be at least 6 characters",
-                  },
-                })}
-                onCopy={preventCopyPaste}
-                onPaste={preventCopyPaste}
-                onCut={preventCopyPaste}
-                onKeyDown={preventCopyPaste}
-                className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-blue-500"
-                placeholder="Enter password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
-              >
-                {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-              </button>
+                <input
+                  // type="password"
+                  type={showPassword ? "text" : "password"}
+                  form="add-manager-form"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters",
+                    },
+                  })}
+                  onCopy={preventCopyPaste}
+                  onPaste={preventCopyPaste}
+                  onCut={preventCopyPaste}
+                  onKeyDown={preventCopyPaste}
+                  className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-blue-500"
+                  placeholder="Enter password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
+                >
+                  {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                </button>
               </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-500 text-[12px]">
@@ -338,28 +345,26 @@ function AddManager() {
               <label className="mb-2 block font-[Poppins] text-[14px] font-medium leading-[100%] tracking-normal text-[#444444]">
                 Confirm Password <span className="text-red-500">*</span>
               </label>
-               <div className="relative">
-              <input
-                // type="password"
-                type={showConfirmPassword ? "text" : "password"}
-                form="add-manager-form"
-                {...register("confirmPassword", {
-                  required: "Confirm password is required",
-                  validate: (value) =>
-                    value === password || "Passwords do not match",
-                })}
-                onCopy={preventCopyPaste}
-                onPaste={preventCopyPaste}
-                onCut={preventCopyPaste}
-                onKeyDown={preventCopyPaste}
-                className={getInputClassName(!!errors.confirmPassword)}
-                placeholder="Re-enter password"
-              />
-               <button
+              <div className="relative">
+                <input
+                  // type="password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  form="add-manager-form"
+                  {...register("confirmPassword", {
+                    required: "Confirm password is required",
+                    validate: (value) =>
+                      value === password || "Passwords do not match",
+                  })}
+                  onCopy={preventCopyPaste}
+                  onPaste={preventCopyPaste}
+                  onCut={preventCopyPaste}
+                  onKeyDown={preventCopyPaste}
+                  className={getInputClassName(!!errors.confirmPassword)}
+                  placeholder="Re-enter password"
+                />
+                <button
                   type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500"
                 >
                   {showConfirmPassword ? (
@@ -368,7 +373,7 @@ function AddManager() {
                     <FiEye size={20} />
                   )}
                 </button>
-                </div>
+              </div>
               {errors.confirmPassword && (
                 <p className="mt-1 text-sm text-red-500 text-[12px]">
                   {errors.confirmPassword.message}
