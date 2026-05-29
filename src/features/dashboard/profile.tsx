@@ -23,7 +23,7 @@ function Profile() {
         const user = await getProfile();
 
         if (active) {
-          setProfile(user);
+          setProfile(user ?? null);
         }
       } catch (error: any) {
         if (active) {

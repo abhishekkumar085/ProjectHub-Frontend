@@ -44,7 +44,7 @@ export const getProfile = async () => {
     const response = await api.get("/profile/me");
     const user = getUserFromResponse(response.data);
     saveStoredUser(user);
-     return response.data.user; 
+     return user;
   } catch (error) {
    console.log("Error while getting profile")
   }
