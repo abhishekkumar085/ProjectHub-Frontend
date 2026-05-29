@@ -88,8 +88,8 @@ function EditProfile() {
   const onSubmit = async (data: EditProfileFormValues) => {
     try {
       await updateProfile({
+        name: data.name,
         designation: data.designation,
-        role: data.role,
         mobileNumber: data.mobileNumber,
       });
 
@@ -192,7 +192,6 @@ function EditProfile() {
                 <Controller
                   name="role"
                   control={control}
-                  rules={{ required: "Role is required" }}
                   render={({ field }) => (
                     <Select
                       {...field}
