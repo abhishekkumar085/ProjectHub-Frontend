@@ -176,7 +176,7 @@ function AddManager() {
                 {...register("empId", {
                   required: "Employee ID is required",
                   pattern: {
-                    value: /^PIS\d{5}$/,
+                    value: /^PIS\d{4,5}$/,
                     message: "Employee ID must be like PIS10000",
                   },
                 })}

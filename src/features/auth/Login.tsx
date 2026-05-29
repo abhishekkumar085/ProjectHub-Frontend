@@ -191,7 +191,20 @@ function Login() {
           </div>
           {/* RIGHT SIDE */}
           <div className="w-full lg:w-5/12 xl:w-4/12 bg-white h-screen overflow-hidden">
-            <div className="h-full overflow-y-auto px-5 sm:px-8 md:px-10 py-8 sm:py-10">
+            {/* SCROLLABLE FORM SECTION */}
+            <div
+              className="
+      h-full
+      overflow-y-auto
+      px-5 sm:px-8 md:px-10
+      py-8 sm:py-10
+
+      scrollbar-thin
+      scrollbar-thumb-[#0057ff]
+      scrollbar-track-[#edf3ff]
+      hover:scrollbar-thumb-[#0047d6]
+    "
+            >
               <div className="w-full max-w-[480px] mx-auto">
                 {/* LOGO */}
                 <div className="mb-6 sm:mb-8">
@@ -220,7 +233,7 @@ function Login() {
                       Email Address
                     </label>
 
-                    <div className="flex h-[50px] sm:h-[52px] overflow-hidden rounded-xl border-2 border-[#d6deff] focus-within:border-[#0057ff] transition">
+                    <div className="flex h-[50px] sm:h-[52px] overflow-hidden rounded-xl border-2 border-[#d6deff] transition focus-within:border-[#0057ff]">
                       <div className="flex w-[52px] sm:w-[55px] items-center justify-center bg-[#eef3ff] text-[#0057ff]">
                         <FiMail size={18} />
                       </div>
@@ -242,7 +255,7 @@ function Login() {
                       Password
                     </label>
 
-                    <div className="flex h-[50px] sm:h-[52px] overflow-hidden rounded-xl border-2 border-[#d6deff] focus-within:border-[#0057ff] transition">
+                    <div className="flex h-[50px] sm:h-[52px] overflow-hidden rounded-xl border-2 border-[#d6deff] transition focus-within:border-[#0057ff]">
                       <div className="flex w-[52px] sm:w-[55px] items-center justify-center bg-[#eef3ff] text-[#0057ff]">
                         <FiLock size={18} />
                       </div>
@@ -259,15 +272,15 @@ function Login() {
                   </div>
 
                   {/* OPTIONS */}
-                  <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                  <div className="mb-6 flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                     <label className="flex items-center gap-2 text-gray-500">
-                      <input type="checkbox" />
+                      <input type="checkbox" className="accent-[#0057ff]" />
                       Remember me
                     </label>
 
                     <button
                       type="button"
-                      className="font-medium text-[#0057ff] text-left sm:text-right"
+                      className="text-left font-medium text-[#0057ff] sm:text-right"
                     >
                       Forget Password?
                     </button>
