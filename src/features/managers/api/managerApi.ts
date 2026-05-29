@@ -100,6 +100,21 @@ export const updateManager = async (
   return response.data;
 };
 
+export const toggleManager = async (
+  id: string,
+  isEnabled: boolean,
+): Promise<Manager> => {
+  const response = await api.patch(`/users/${id}/toggle`, { isEnabled });
+  const payload = response.data as any;
+
+  return (
+    payload?.data?.user ??
+    payload?.data ??
+    payload?.user ??
+    payload
+  ) as Manager;
+};
+
 export const deleteManager = async (
   id: string
 ): Promise<void> => {

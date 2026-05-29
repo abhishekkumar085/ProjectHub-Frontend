@@ -239,6 +239,21 @@ export const updateProject = async (
   return res.data.data;
 };
 
+export const toggleProject = async (
+  id: string,
+  isEnabled: boolean,
+): Promise<Project> => {
+  const res = await api.patch(`/project/${id}/toggle`, { isEnabled });
+  const payload = res.data as any;
+
+  return (
+    payload?.data?.project ??
+    payload?.data ??
+    payload?.project ??
+    payload
+  ) as Project;
+};
+
 export const deleteProject = async (id: string): Promise<void> => {
   await api.delete(`/projects/${id}`);
 };

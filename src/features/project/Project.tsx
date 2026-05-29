@@ -14,7 +14,7 @@ import plusIcon from "../../assets/plus icon.png";
 
 import StatusBadge from "./StatusBadge";
 import type { Project } from "./types/project.types";
-import { listProjects, updateProject } from "./api/projectApi";
+import { listProjects, toggleProject } from "./api/projectApi";
 import Loader from "../../components/common/Loader";
 import Pagination from "../../components/common/Pagination";
 import EmptyState from "../../components/Emptyset";
@@ -79,11 +79,13 @@ function Projects() {
 
   const handleToggle = async (project: Project) => {
     try {
-      await updateProject(project.id, { isEnabled: !project.isEnabled }, [], undefined);
+      const nextIsEnabled = !project.isEnabled;
+      const updated = await toggleProject(project.id, nextIsEnabled);
+
       setItems((prev) =>
         prev.map((item) =>
           item.id === project.id
-            ? { ...item, isEnabled: !item.isEnabled }
+            ? { ...item, isEnabled: updated.isEnabled ?? nextIsEnabled }
             : item,
         ),
       );

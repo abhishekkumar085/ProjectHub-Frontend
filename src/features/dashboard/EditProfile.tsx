@@ -144,7 +144,6 @@ function EditProfile() {
                 </label>
                 <input
                   {...register("name")}
-                  disabled
                   className={inputClass}
                   placeholder="Full name"
                 />
@@ -197,6 +196,7 @@ function EditProfile() {
                   render={({ field }) => (
                     <Select
                       {...field}
+                       isDisabled={true}
                       value={
                         roleOptions.find(
                           (option) => option.value === field.value,
@@ -223,6 +223,7 @@ function EditProfile() {
                 />
                 {errors.role && (
                   <p className="mt-1 text-sm text-red-500">
+                    
                     {errors.role.message}
                   </p>
                 )}
