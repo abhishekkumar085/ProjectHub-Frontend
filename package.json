@@ -24,6 +24,7 @@
     "react-router-dom": "^7.15.1",
     "react-select": "^5.10.2",
     "recharts": "^2.15.4",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
