@@ -271,17 +271,23 @@ function Projects() {
                             )}
                           </button>
 
-                          <button
-                            onClick={() => handleToggle(p)}
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg ${p.isEnabled ? "bg-[#E8F5E9] text-[#2370ff] hover:bg-[#d7efd7]" : "bg-[#F5F5F5] text-[#6B7280] hover:bg-[#e5e7eb]"}`}
-                            title={p.isEnabled ? "Disable project" : "Enable project"}
-                          >
-                            {p.isEnabled ? (
-                              <FiToggleRight size={18} />
-                            ) : (
-                              <FiToggleLeft size={18} />
-                            )}
-                          </button>
+                          {userRole === "ADMIN" && (
+                            <button
+                              onClick={() => handleToggle(p)}
+                              className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                                p.isEnabled
+                                  ? "bg-[#E8F5E9] text-[#2370ff] hover:bg-[#d7efd7]"
+                                  : "bg-[#F5F5F5] text-[#6B7280] hover:bg-[#e5e7eb]"
+                              }`}
+                              title={p.isEnabled ? "Disable project" : "Enable project"}
+                            >
+                              {p.isEnabled ? (
+                                <FiToggleRight size={18} />
+                              ) : (
+                                <FiToggleLeft size={18} />
+                              )}
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
