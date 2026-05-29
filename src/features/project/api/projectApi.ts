@@ -1,6 +1,9 @@
-import type { CreateProjectPayload, Project, ProjectDocument } from "../types/project.types";
+import type {
+  CreateProjectPayload,
+  Project,
+  ProjectDocument,
+} from "../types/project.types";
 import api from "../../../api/axios";
-
 
 export type ListProjectsResult = {
   projects: Project[];
@@ -94,9 +97,11 @@ export const getProjectById = async (id: string): Promise<Project | null> => {
 export const listProjectsForUser = async (
   userId: string,
   page = 1,
-  limit = 10
+  limit = 10,
 ): Promise<ListProjectsForUserResult> => {
-  const res = await api.get(`/users/${userId}/projects?page=${page}&limit=${limit}`);
+  const res = await api.get(
+    `/users/${userId}/projects?page=${page}&limit=${limit}`,
+  );
   const payload = res.data as any;
 
   // Extract manager info from the root of data object
@@ -112,9 +117,12 @@ export const listProjectsForUser = async (
 
   const dataProjects: Project[] | undefined =
     // new API may return assignedProjects with nested project objects
-    payload?.data?.projects ?? payload?.data?.createdProjects ??
+    payload?.data?.projects ??
+    payload?.data?.createdProjects ??
     (Array.isArray(payload?.data?.assignedProjects)
-      ? payload.data.assignedProjects.map((ap: any) => ap.project).filter(Boolean)
+      ? payload.data.assignedProjects
+          .map((ap: any) => ap.project)
+          .filter(Boolean)
       : undefined);
   if (Array.isArray(dataProjects)) {
     const projects: Project[] = dataProjects;
@@ -137,7 +145,14 @@ export const listProjectsForUser = async (
     payload?.projects ?? payload?.createdProjects;
   if (Array.isArray(rootProjects)) {
     const projects: Project[] = rootProjects;
-    return { projects, total: projects.length, page, limit, totalPages: 1, manager };
+    return {
+      projects,
+      total: projects.length,
+      page,
+      limit,
+      totalPages: 1,
+      manager,
+    };
   }
 
   return { projects: [], total: 0, page, limit, totalPages: 1, manager };
@@ -150,7 +165,9 @@ export type IncompleteProjectCountResult = {
 export const getIncompleteProjectCount = async (
   userId: string,
 ): Promise<IncompleteProjectCountResult> => {
-  const res = await api.get(`/project/user/${userId}/incomplete-projects/count`);
+  const res = await api.get(
+    `/project/user/${userId}/incomplete-projects/count`,
+  );
   const payload = res.data as any;
 
   if (payload?.data?.incompleteProjectCount != null) {
@@ -188,20 +205,15 @@ export const createProject = async (
 
 export const assignProjectUsers = async (
   projectId: string,
-  userIds: string[]
+  userIds: string[],
 ) => {
-  const res = await api.post(
-    `/project/${projectId}/assign`,
-    { userIds }
-  );
+  const res = await api.post(`/project/${projectId}/assign`, { userIds });
 
   return res.data;
 };
 
 export const getAssignableUsers = async () => {
-  const res = await api.get(
-    "/project/assignable-users"
-  );
+  const res = await api.get("/project/assignable-users");
 
   return res.data.data;
 };
@@ -227,36 +239,27 @@ export const updateProject = async (
   return res.data.data;
 };
 
-export const deleteProject = async (
-  id: string
-): Promise<void> => {
+export const deleteProject = async (id: string): Promise<void> => {
   await api.delete(`/projects/${id}`);
 };
 
 export const uploadDocument = async (
   projectId: string,
-  file: File
+  file: File,
 ): Promise<ProjectDocument> => {
   const fd = new FormData();
   fd.append("file", file);
 
-  const res = await api.post(
-    `/projects/${projectId}/documents`,
-    fd
-  );
+  const res = await api.post(`/projects/${projectId}/documents`, fd);
 
   return res.data.data;
 };
 
 export const createProjectRemark = async (
   projectId: string,
-  remark: string
+  remark: string,
 ): Promise<any> => {
-  
-  const res = await api.post(
-    `/project/${projectId}/create-remark`,
-  {remark}
-  );
+  const res = await api.post(`/project/${projectId}/create-remark`, { remark });
 
-  return res.data.data;
+  return res.data;
 };

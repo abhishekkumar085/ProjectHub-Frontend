@@ -16,6 +16,8 @@ import Breadcrumb from "../../components/common/Breadcrumb";
 import Loader from "../../components/common/Loader";
 import { createProjectRemark, getProjectById } from "./api/projectApi";
 import type { Project, Remark } from "./types/project.types";
+import { extractDateTime } from "../../utils/contants";
+import toast from "react-hot-toast";
 
 function ViewProject() {
   const { id } = useParams<{ id: string }>();
@@ -25,6 +27,7 @@ function ViewProject() {
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [remark, setRemark] = useState("");
+  const [remarkLoading, setRemarkLoading] = useState(false);
 
   const [previewDocument, setPreviewDocument] = useState<any | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -183,26 +186,26 @@ function ViewProject() {
     },
     ...(isAdmin
       ? [
-        {
-          icon: <Users size={20} className="text-blue-600" />,
-          label: "ASSIGNED TO",
-          value:
-            assignedToList.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {assignedToList.map((name) => (
-                  <span
-                    key={name}
-                    className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
-                  >
-                    {name}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              "-"
-            ),
-        },
-      ]
+          {
+            icon: <Users size={20} className="text-blue-600" />,
+            label: "ASSIGNED TO",
+            value:
+              assignedToList.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {assignedToList.map((name) => (
+                    <span
+                      key={name}
+                      className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-700"
+                    >
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                "-"
+              ),
+          },
+        ]
       : []),
     {
       icon: <Users size={20} className="text-blue-600" />,
@@ -245,13 +248,28 @@ function ViewProject() {
 
   const docs = project?.documents || [];
 
-
   const handleRemarkSave = async (remark: string) => {
-    if (!id) return
-    await createProjectRemark(id, remark)
-  }
+    if (!id) return;
+    try {
+      setRemarkLoading(true);
+      const response = await createProjectRemark(id, remark);
+      console.log("Remark save response:", response);
+      if (response.success) {
+        setRemark("");
+        toast.success(response?.message || "Remark added successfully!");
 
+        const updatedProject = await getProjectById(id);
 
+        setProject(updatedProject);
+      }
+    } catch (error) {
+      console.error("Error saving remark:", error);
+      toast.error("Failed to save remark. Please try again.");
+      return;
+    } finally {
+      setRemarkLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -278,7 +296,9 @@ function ViewProject() {
         </button>
       </div>
 
-      {loading ? <Loader /> : (
+      {loading ? (
+        <Loader />
+      ) : (
         <>
           <div className="w-full p-4 sm:p-5 lg:p-6 bg-white rounded-2xl shadow-[0px_4px_16px_0px_#00000014]">
             <h1 className="font-[Poppins] font-semibold text-[16px] leading-[100%] tracking-[0%] text-[#161616] mb-3">
@@ -363,7 +383,9 @@ function ViewProject() {
                     </div>
                   ) : previewUrl ? (
                     <iframe
-                      title={previewDocument?.originalName || "document-preview"}
+                      title={
+                        previewDocument?.originalName || "document-preview"
+                      }
                       src={previewUrl}
                       className="h-full w-full rounded-b-2xl"
                     />
@@ -434,8 +456,8 @@ function ViewProject() {
             </h1>
 
             {/* Input Section */}
-            {
-              userRole !== "ADMIN" && (<div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-start mb-5">
+            {userRole !== "ADMIN" && (
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-start mb-5">
                 <textarea
                   placeholder="Enter Here..."
                   value={remark}
@@ -465,28 +487,29 @@ function ViewProject() {
               transition-all
               w-full sm:w-auto
               min-w-[100px]
+
             "
+                  disabled={remark.trim() === "" || remarkLoading}
                   onClick={() => handleRemarkSave(remark)}
                 >
-                  Save
+                  {remarkLoading ? "Saving..." : "Save"}
                 </button>
-              </div>)
-            }
-
+              </div>
+            )}
 
             {/* Remarks List */}
             <div className="space-y-4">
-              {project?.remarks?.length > 0 &&
-        project?.remarks?.map((item: Remark, index: number) => (
-          <div
-            key={index}
-            className="bg-[#F5F5F5] rounded-2xl p-4 sm:p-5"
-          >
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-              <div className="flex items-center gap-2">
-                <div
-                  className="
+              {project?.remarks!?.length > 0 &&
+                project?.remarks?.map((item: Remark, index: number) => (
+                  <div
+                    key={item?.createdAt}
+                    className="bg-[#F5F5F5] rounded-2xl p-4 sm:p-5"
+                  >
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="
                     w-8
                     h-8
                     rounded-[20px]
@@ -495,43 +518,45 @@ function ViewProject() {
                     justify-center
                     bg-white
                   "
-                >
-                  <User size={14} className="text-blue-500" />
-                </div>
+                        >
+                          <User size={14} className="text-blue-500" />
+                        </div>
 
-                <h3
-                  className="
+                        <h3
+                          className="
                     font-[Poppins]
                     font-medium
                     text-[14px]
                     text-[#7A7A7A]
                   "
-                >
-                  {item?.addedBy?.name}
-                </h3>
-              </div>
+                        >
+                          {item?.addedBy?.name}
+                        </h3>
+                      </div>
 
-              <span className="text-xs sm:text-sm text-gray-500">
-                {item?.createdAt}
-              </span>
-            </div>
+                      <span className="text-xs sm:text-sm text-gray-500">
+                        {extractDateTime(item.createdAt).date}{" "}
+                        {extractDateTime(item.createdAt).time}
+                      </span>
+                    </div>
 
-            {/* Remark Text */}
-            <p
-              className="
+                    {/* Remark Text */}
+                    <p
+                      className="
                 font-[Poppins]
                 font-medium
                 text-[14px]
                 text-[#161616]
               "
-            >
-              {item?.remark}
-            </p>
-          </div>
-        ))}
+                    >
+                      {item?.remark}
+                    </p>
+                  </div>
+                ))}
             </div>
           </div>
-        </>)}
+        </>
+      )}
     </div>
   );
 }

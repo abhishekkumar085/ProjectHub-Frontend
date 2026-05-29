@@ -6,11 +6,7 @@ export type ProjectStatus =
   | "ON_HOLD"
   | "CANCELLED";
 
-export type ProjectPriority =
-  | "LOW"
-  | "MEDIUM"
-  | "HIGH"
-  | "CRITICAL";
+export type ProjectPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 export interface ProjectMember {
   assignedTo?: {
@@ -57,7 +53,7 @@ export interface Project {
   assignedUsers?: string[];
   isEnabled?: boolean;
   members?: ProjectMember[];
-  remarks?: Remark[];
+  remarks: Remark[];
   // createdAt: string;
   // updatedAt: string;
 }
@@ -69,9 +65,6 @@ export type Remark = {
     name: string;
   };
 };
-
-
-
 
 export interface CreateProjectPayload {
   name: string;
