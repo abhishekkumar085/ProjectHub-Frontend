@@ -9,7 +9,7 @@ import {
   FiChevronRight,
 } from "react-icons/fi";
 import plusIcon from "../../assets/plus icon.png";
-import { listManagers, updateManager } from "./api/managerApi";
+import { listManagers, toggleManager } from "./api/managerApi";
 import type { Manager } from "./types/manager.types";
 import Loader from "../../components/common/Loader";
 import Pagination from "../../components/common/Pagination";
@@ -30,6 +30,8 @@ function Managers() {
 
       const res = await listManagers(p, limit);
 
+      console.log("Managers:", res.users);
+
       setItems(res.users);
       setTotal(res.total);
       setTotalPages(res.totalPages);
@@ -45,13 +47,15 @@ function Managers() {
 
   const handleToggle = async (manager: Manager) => {
     try {
-      const updated = await updateManager(manager.id, {
-        isEnabled: !manager.isEnabled,
-      });
-
+      const nextIsEnabled = !manager.isEnabled;
+      const updated = await toggleManager(manager.id, nextIsEnabled);
+      
+      console.log("API Response:", updated);
       setItems((prev) =>
         prev.map((item) =>
-          item.id === manager.id ? { ...item, isEnabled: updated.isEnabled } : item,
+          item.id === manager.id
+            ? { ...item, isEnabled: updated.isEnabled ?? nextIsEnabled }
+            : item,
         ),
       );
     } catch (error) {

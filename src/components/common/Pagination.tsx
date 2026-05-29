@@ -12,7 +12,6 @@ interface PaginationProps {
 function Pagination({
   page,
   totalPages,
-  total,
   onPrev,
   onNext,
   onPageChange,

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
-import loginBg from "../../assets/loginbackgroun.jpg";
 import img1 from "../../assets/img/img-1.png";
 import img2 from "../../assets/img/img-2.png";
 import img3 from "../../assets/img/img-3.png";
