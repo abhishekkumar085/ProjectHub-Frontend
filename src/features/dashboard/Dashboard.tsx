@@ -7,8 +7,6 @@ import completedIcon from "../../assets/Completed.png";
 import { useEffect, useState } from "react";
 import { getDashboardApi } from "../dashboard/api/DashboardApi";
 import Highcharts from "highcharts";
-
-import Loader from "../../components/common/Loader";
 import { HighchartsReact } from "highcharts-react-official";
 
 interface KpiTile {
@@ -84,7 +82,7 @@ function Dashboard() {
   0
 );
 
-const dynamicMax = maxValue === 0 ? 10 : Math.ceil(maxValue / 5) * 5;
+const dynamicMax = maxValue === 0 ? 10 : Math.ceil((maxValue + 2) / 5) * 5;
 
 const dynamicTickInterval = Math.max(
   1,
@@ -194,18 +192,18 @@ const dynamicTickInterval = Math.max(
         name: "Active",
         type: "spline",
         data: graphData.map((item) => item.active),
-        color: "#208A17",
+        color: "#252D9E",
         marker: {
-          lineColor: "#208A17",
+          lineColor: "#252D9E",
         },
       },
       {
         name: "Completed",
         type: "spline",
         data: graphData.map((item) => item.completed),
-        color: "#FF2C2C",
+        color: "#208A17",
         marker: {
-          lineColor: "#FF2C2C",
+          lineColor: "#208A17",
         },
       },
     ],
